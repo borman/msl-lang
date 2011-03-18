@@ -1,0 +1,12 @@
+fun on_turn N
+  print ["Ход номер", N]
+  buy [2, RawPrice]
+  sell [production MyId, ProductionPrice]
+  if N%2 = 1 then
+    MinProd = 2
+  else
+    MinProd = 1
+  end;
+  ToProduce = min [2, raw MyId]
+  produce ToProduce
+end
