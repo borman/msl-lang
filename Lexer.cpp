@@ -28,6 +28,9 @@ void Lexer::feed(char c)
     case S_Token:
       m_state = stateToken(c);
       break;
+    case S_Comment:
+      m_state = stateComment(c);
+      break;
   }
   if (c != '\n')
     m_col++;
@@ -51,7 +54,9 @@ static inline bool isdelim(char c)
 
 Lexer::State Lexer::stateWhitespace(char c)
 {
-  if (isdelim(c))
+  if (isspace(c))
+    return S_Whitespace;
+  else if (isdelim(c))
   {
     beginToken(m_row, m_col);
     putChar(c);
@@ -70,9 +75,9 @@ Lexer::State Lexer::stateWhitespace(char c)
     setLiteral();
     return S_Quoted;
   }
-  else if (isspace(c))
-    return S_Whitespace;
-  else
+  else if (c == ';')
+    return S_Comment;
+  else 
     throw LexerException(m_row, m_col, "Unexpected character after whitespace");
 }
 
@@ -128,8 +133,21 @@ Lexer::State Lexer::stateToken(char c)
     endToken(m_row, m_col);
     return S_Quoted;
   }
+  else if (c == ';')
+  {
+    endToken(m_row, m_col-1);
+    return S_Comment;
+  }
   else
     throw LexerException(m_row, m_col, "Unexpected character in token");
+}
+
+Lexer::State Lexer::stateComment(char c)
+{
+  if (c == '\n')
+    return S_Whitespace;
+  else
+    return S_Comment;
 }
 
 void Lexer::putChar(char c)

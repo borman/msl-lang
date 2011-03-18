@@ -6,7 +6,12 @@ fun on_turn N
     MinProd = 2
   else
     MinProd = 1
-  end;
+  end
+
+  ; Интеграл от кол-ва продукции
+  for I from 1 to NPlayers
+    $Something(I) = $Something(I) + production MyId
+
   ToProduce = min [2, raw MyId]
   produce ToProduce
 end

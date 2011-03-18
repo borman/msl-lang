@@ -36,13 +36,15 @@ class Lexer
       S_Whitespace,
       S_Quoted,
       S_QuotedEsc,
-      S_Token
+      S_Token,
+      S_Comment
     };
 
     State stateWhitespace(char c);
     State stateQuoted(char c);
     State stateQuotedEsc(char c);
     State stateToken(char c);
+    State stateComment(char c);
 
     void putChar(char c);
     void beginToken(int row, int col);
