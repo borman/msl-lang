@@ -23,19 +23,30 @@ namespace Lexem
       enum Type
       {
         None,
+        // Intermediate forms
         Token,
         Symbol, 
+        // Constants
         Literal,
         Real,
         Int,
         Bool,
+        // Complex expression items
         Variable,
         FuncCall,
         ArrayItem,
         Tuple,
         Expression,
         Selector,
-        Infix
+        Infix,
+        // Higher-level items
+        Let,
+        Do,
+        If,
+        While,
+        For,
+        // Top-level item
+        Fun
       };
 
       static const Type m_class_type = None;
@@ -99,9 +110,11 @@ namespace Lexem
         While,
         If, Then, Else,
         // Infix operators
+        InfixBegin,
         Equals, Less, Greater,
         Plus, Minus, Mul, Div, Mod,
         And, Or,
+        InfixEnd,
         // Delimiters
         Comma, 
         LParen, RParen,
@@ -304,7 +317,109 @@ namespace Lexem
       Base *m_right;
   };
 
+  // Higher-level
+  class Let: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::Let;
+
+      Let(Base *lvalue, Base *rvalue, const TextRegion &r)
+        : Base(m_class_type, r),
+          m_lvalue(lvalue), m_rvalue(rvalue) {} 
+
+      Base *lvalue() const { return m_lvalue; }
+      Base *rvalue() const { return m_rvalue; }
+    private:
+      Base *m_lvalue;
+      Base *m_rvalue;
+  };
+
+  class Do: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::Do;
+
+      Do(Base *expr, const TextRegion &r)
+        : Base(m_class_type, r),
+          m_expr(expr) {} 
+
+      Base *expr() const { return m_expr; }
+    private:
+      Base *m_expr;
+  };
+
+  class If: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::If;
+
+      If(Base *condition, Base *positive, Base *negative, const TextRegion &r)
+        : Base(m_class_type, r),
+          m_condition(condition), m_positive(positive), m_negative(negative) {} 
+
+      Base *condition() const { return m_condition; }
+      Base *positive() const { return m_positive; }
+      Base *negative() const { return m_negative; }
+
+    private:
+      Base *m_condition;
+      Base *m_positive;
+      Base *m_negative;
+  };
+
+  class While: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::While;
+
+      While(Base *condition, Base *body, const TextRegion &r)
+        : Base(m_class_type, r),
+          m_condition(condition), m_body(body) {} 
+
+      Base *condition() const { return m_condition; }
+      Base *body() const { return m_body; }
+    private:
+      Base *m_condition;
+      Base *m_body;
+  };
   
+  class For: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::For;
+
+      For(Lexem::Variable *var, Base *from, Base *to, Base *body, const TextRegion &r)
+        : Base(m_class_type, r),
+          m_var(var), m_from(from), m_to(to), m_body(body) {} 
+
+      Lexem::Variable *var() const { return m_var; }
+      Base *from() const { return m_from; }
+      Base *to() const { return m_to; }
+      Base *body() const { return m_body; }
+    private:
+      Lexem::Variable *m_var;
+      Base *m_from;
+      Base *m_to;
+      Base *m_body;
+  };
+
+  class Fun: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::Fun;
+
+      Fun(const std::string &name, Base *arg, Base *body, const TextRegion &r)
+        : Base(m_class_type, r),
+          m_name(name), m_arg(arg), m_body(body) {} 
+
+      std::string name() const { return m_name; }
+      Base *arg() const { return m_arg; }
+      Base *body() const { return m_body; }
+    private:
+      std::string m_name;
+      Base *m_arg;
+      Base *m_body;
+  };
 } // namespace Lexem
 
 #endif // LEXEM_H

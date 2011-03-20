@@ -36,7 +36,7 @@ int main()
   for(Base *t = tokens; t != NULL; t = t->next<Base>())
   {
     const TextRegion &r = t->region();
-    printf("<%u:%u - %u:%u>\t", 
+    printf("<%2u:%2u - %2u:%2u>\t", 
            r.startRow, r.startCol,
            r.endRow, r.endCol);
     switch (t->type())
@@ -71,6 +71,10 @@ int main()
 
       case Base::ArrayItem:
         printf("ARR  %s", t->as<ArrayItem>()->name().c_str());
+        break;
+
+      case Base::Infix:
+        printf("INFX %d", t->as<Infix>()->subtype());
         break;
 
       default:

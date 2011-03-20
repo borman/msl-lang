@@ -93,6 +93,27 @@ static bool validateInt(const string &str, int &result)
     return false;
 }
 
+static Infix::Subtype infixType(Symbol::Subtype t)
+{
+  switch (t)
+  {
+    case Symbol::Equals: return Infix::Equals;
+    case Symbol::Less: return Infix::Less;
+    case Symbol::Greater: return Infix::Greater;
+
+    case Symbol::Plus: return Infix::Plus;
+    case Symbol::Minus: return Infix::Minus;
+    case Symbol::Mul: return Infix::Mul;
+    case Symbol::Div: return Infix::Div;
+    case Symbol::Mod: return Infix::Mod;
+
+    case Symbol::And: return Infix::And;
+    case Symbol::Or: return Infix::Or;
+
+    default: abort();
+  }
+}
+
 Lexem::Base *Lexer::consume(Token *token)
 {
   const string &str = token->text();
@@ -104,7 +125,12 @@ Lexem::Base *Lexer::consume(Token *token)
   // Symbol
   Symbols::Ref sym = Symbols::find(str);
   if (sym.isValid())
-    return new Symbol(sym.type(), token->region());
+  {
+    if (sym.type() > Symbol::InfixBegin && sym.type() < Symbol::InfixEnd)
+      return new Infix(infixType(sym.type()), NULL, NULL, token->region());
+    else
+      return new Symbol(sym.type(), token->region());
+  }
 
   // Boolean
   if (str == "true")
@@ -112,26 +138,25 @@ Lexem::Base *Lexer::consume(Token *token)
   if (str == "false")
     return new Bool(true, token->region());
 
-  // Identifier
+  // Function name
   if (islower(str[0]))
   {
-    // Function name
     if (!validateIdentifier(str))
       throw Exception("Invalid function name", str, token->region());
     return new FuncCall(str, NULL, token->region());
   }
 
+  // Variable name
   if (isupper(str[0]))
   {
-    // Variable name
     if (!validateIdentifier(str))
       throw Exception("Invalid variable name", str, token->region());
     return new Variable(str, token->region());
   }
 
+  // Array name
   if (str[0] == '$')
   {
-    // Array name
     string name = str.substr(1); // Remove leading $
     if (!validateIdentifier(name))
       throw Exception("Invalid array name", str, token->region());
