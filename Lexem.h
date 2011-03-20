@@ -1,6 +1,7 @@
 #ifndef LEXEM_H
 #define LEXEM_H
 
+#include <cassert>
 #include <string>
 
 namespace Lexem
@@ -21,15 +22,23 @@ namespace Lexem
     public:
       enum Type
       {
-        Invalid,
+        None,
         Token,
-        Symbol, // for, if, then, etc...
-        Identifier, // <VNAME>, <ANAME>, <FNAME>
+        Symbol, 
         Literal,
         Real,
         Int,
-        Bool
+        Bool,
+        Variable,
+        FuncCall,
+        ArrayItem,
+        Tuple,
+        Expression,
+        Selector,
+        Infix
       };
+
+      static const Type m_class_type = None;
 
       Base(Type t, const TextRegion &r)
         : m_type(t), m_region(r), m_next(NULL) {}
@@ -38,16 +47,19 @@ namespace Lexem
       Type type() const { return m_type; }
       TextRegion region() const { return m_region; }
 
+      // Simple runtime type-checking
       template<class T>
-        T *as() { return static_cast<T *>(this); }
+        T *as() 
+        { 
+          assert(T::m_class_type == None || T::m_class_type==type()); 
+          return static_cast<T *>(this); 
+        }
       template<class T>
-        T *next() { return m_next->as<T>(); }
+        T *next() { return m_next==NULL? NULL : m_next->as<T>(); }
 
       void setNext(Base *l) { m_next = l; }
 
     private:
-      static const Type m_class_type = Invalid;
-
       Type m_type;
       TextRegion m_region;
       Base *m_next;
@@ -58,23 +70,26 @@ namespace Lexem
   class Token: public Base
   {
     public:
+      static const Base::Type m_class_type = Base::Token;
+
       Token(const std::string &t, bool l, const TextRegion &r)
-        : Base(Base::Token, r), m_is_literal(l), m_text(t) {} 
+        : Base(m_class_type, r), 
+          m_is_literal(l), m_text(t) {} 
 
       std::string text() const { return m_text; }
       bool isLiteral() const { return m_is_literal; }
     private:
-      static const Base::Type m_class_type = Base::Token;
-
       bool m_is_literal;
       std::string m_text;
   };
 
-  // ===== Token specializations
+  // ===== Intermediate lexems: will be replced by parser
 
   class Symbol: public Base
   {
     public:
+      static const Base::Type m_class_type = Base::Symbol;
+
       enum Subtype
       {
         // Keywords
@@ -94,72 +109,55 @@ namespace Lexem
       };
 
       Symbol(Subtype t, const TextRegion &r)
-        : Base(Base::Symbol, r), m_subtype(t) {} 
+        : Base(m_class_type, r),
+          m_subtype(t) {} 
 
       Subtype subtype() const { return m_subtype; }
     private:
-      static const Base::Type m_class_type = Base::Symbol;
-
       Subtype m_subtype;
   };
 
-  class Identifier: public Base
-  {
-    public:
-      enum Subtype
-      {
-        Variable,
-        Array,
-        Function
-      };
-
-      Identifier(Subtype t, const std::string &s, const TextRegion &r)
-        : Base(Base::Identifier, r), m_subtype(t), m_text(s) {} 
-
-      Subtype subtype() const { return m_subtype; }
-      std::string text() const { return m_text; }
-    private:
-      static const Base::Type m_class_type = Base::Identifier;
-
-      Subtype m_subtype;
-      std::string m_text;
-  };
+  // ===== Constants
 
   class Literal: public Base
   {
     public:
+      static const Base::Type m_class_type = Base::Literal;
+
       Literal(const std::string &s, const TextRegion &r)
-        : Base(Base::Literal, r), m_text(s) {} 
+        : Base(m_class_type, r), 
+          m_text(s) {} 
 
       std::string text() const { return m_text; }
     private:
-      static const Base::Type m_class_type = Base::Literal;
-
       std::string m_text;
   };
 
   class Int: public Base
   {
     public:
+      static const Base::Type m_class_type = Base::Int;
+
       Int(int v, const TextRegion &r)
-        : Base(Base::Int, r), m_value(v) {} 
+        : Base(m_class_type, r), 
+          m_value(v) {} 
 
       int value() const { return m_value; }
     private:
-      static const Base::Type m_class_type = Base::Int;
-
       int m_value;
   };
 
   class Real: public Base
   {
     public:
+      static const Base::Type m_class_type = Base::Real;
+
       Real(double v, const TextRegion &r)
-        : Base(Base::Real, r), m_value(v) {} 
+        : Base(m_class_type, r), 
+          m_value(v) {} 
 
       double value() const { return m_value; }
     private:
-      static const Base::Type m_class_type = Base::Real;
 
       double m_value;
   };
@@ -167,15 +165,146 @@ namespace Lexem
   class Bool: public Base
   {
     public:
+      static const Base::Type m_class_type = Base::Bool;
+
       Bool(bool v, const TextRegion &r)
-        : Base(Base::Bool, r), m_value(v) {} 
+        : Base(m_class_type, r), 
+          m_value(v) {} 
 
       bool value() const { return m_value; }
     private:
-      static const Base::Type m_class_type = Base::Bool;
-
       bool m_value;
   };
+
+  // ===== Complex AST items
+
+  class Variable: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::Variable;
+
+      Variable(const std::string &name, const TextRegion &r)
+        : Base(m_class_type, r), 
+          m_name(name) {} 
+
+      std::string name() const { return m_name; }
+    private:
+      std::string m_name;
+  };
+
+  class FuncCall: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::FuncCall;
+
+      FuncCall(const std::string &name, Base *arg, const TextRegion &r)
+        : Base(m_class_type, r), 
+          m_name(name), m_arg(arg) {} 
+
+      std::string name() const { return m_name; }
+      Base *arg() const { return m_arg; }
+
+      void bind(Base *arg) { m_arg=arg; }
+    private:
+      std::string m_name;
+      Base *m_arg;
+  };
+
+  class ArrayItem: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::ArrayItem;
+
+      ArrayItem(const std::string &name, Base *arg, const TextRegion &r)
+        : Base(m_class_type, r),
+          m_name(name), m_arg(arg) {} 
+
+      std::string name() const { return m_name; }
+      Base *arg() const { return m_arg; }
+
+      void bind(Base *arg) { m_arg=arg; }
+    private:
+      std::string m_name;
+      Base *m_arg;
+  };
+
+  class Tuple: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::Tuple;
+
+      Tuple(Base *contents, const TextRegion &r)
+        : Base(m_class_type, r), 
+          m_contents(contents) {} 
+
+      Base *contents() const { return m_contents; }
+    private:
+      Base *m_contents;
+  };
+  
+  class Expression: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::Expression;
+
+      Expression(Base *contents, const TextRegion &r)
+        : Base(m_class_type, r), 
+          m_contents(contents) {} 
+
+      Base *contents() const { return m_contents; }
+    private:
+      Base *m_contents;
+  };
+
+  class Selector: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::Selector;
+
+      Selector(Base *condition, Base *positive, Base *negative, const TextRegion &r)
+        : Base(m_class_type, r),
+          m_condition(condition), m_positive(positive), m_negative(negative) {} 
+
+      Base *condition() const { return m_condition; }
+      Base *positive() const { return m_positive; }
+      Base *negative() const { return m_negative; }
+
+      void bind(Base *condition, Base *positive, Base *negative) 
+        { m_condition=condition; m_positive=positive; m_negative=negative; }
+    private:
+      Base *m_condition;
+      Base *m_positive;
+      Base *m_negative;
+  };
+
+  class Infix: public Base
+  {
+    public:
+      static const Base::Type m_class_type = Base::Infix;
+
+      enum Subtype
+      {
+        Equals, Less, Greater,
+        Plus, Minus, Mul, Div, Mod,
+        And, Or
+      };
+
+      Infix(Subtype subtype, Base *left, Base *right, const TextRegion &r)
+        : Base(m_class_type, r),
+          m_subtype(subtype), m_left(left), m_right(right) {} 
+
+      Subtype subtype() const { return m_subtype; }
+      Base *left() const { return m_left; }
+      Base *right() const { return m_right; }
+
+      void bind(Base *left, Base *right) { m_left=left; m_right=right; }
+    private:
+      Subtype m_subtype;
+      Base *m_left;
+      Base *m_right;
+  };
+
+  
 } // namespace Lexem
 
 #endif // LEXEM_H

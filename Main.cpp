@@ -61,22 +61,17 @@ int main()
         printf("LIT  %s", t->as<Literal>()->text().c_str());
         break;
 
-      case Base::Identifier:
-      {
-        Identifier *iden = t->as<Identifier>();
-        switch (iden->subtype())
-        {
-          case Identifier::Function:
-            printf("FUN  %s", iden->text().c_str());
-            break;
-          case Identifier::Variable:
-            printf("VAR  %s", iden->text().c_str());
-            break;
-          case Identifier::Array:
-            printf("ARR  %s", iden->text().c_str());
-            break;
-        }
-      } break;
+      case Base::FuncCall:
+        printf("FUN  %s", t->as<FuncCall>()->name().c_str());
+        break;
+      
+      case Base::Variable:
+        printf("VAR  %s", t->as<Variable>()->name().c_str());
+        break;
+
+      case Base::ArrayItem:
+        printf("ARR  %s", t->as<ArrayItem>()->name().c_str());
+        break;
 
       default:
         printf("UNK");

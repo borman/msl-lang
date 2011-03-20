@@ -118,7 +118,7 @@ Lexem::Base *Lexer::consume(Token *token)
     // Function name
     if (!validateIdentifier(str))
       throw Exception("Invalid function name", str, token->region());
-    return new Identifier(Identifier::Function, str, token->region());
+    return new FuncCall(str, NULL, token->region());
   }
 
   if (isupper(str[0]))
@@ -126,7 +126,7 @@ Lexem::Base *Lexer::consume(Token *token)
     // Variable name
     if (!validateIdentifier(str))
       throw Exception("Invalid variable name", str, token->region());
-    return new Identifier(Identifier::Variable, str, token->region());
+    return new Variable(str, token->region());
   }
 
   if (str[0] == '$')
@@ -135,7 +135,7 @@ Lexem::Base *Lexer::consume(Token *token)
     string name = str.substr(1); // Remove leading $
     if (!validateIdentifier(name))
       throw Exception("Invalid array name", str, token->region());
-    return new Identifier(Identifier::Array, name, token->region());
+    return new ArrayItem(name, NULL, token->region());
   }
 
   // Real

@@ -4,9 +4,8 @@ structure Lexer =
 struct
   type lexem = LexerDef.lexresult
 
-  fun lexFile filename =
+  fun lexFile file =
   let
-    val file = TextIO.openIn filename
     val lexer = LexerImpl.makeLexer (fn i => TextIO.inputN (file, i))
     fun do_lex acc =
       case lexer () of
