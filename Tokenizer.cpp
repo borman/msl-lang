@@ -3,10 +3,10 @@
 
 Tokenizer::~Tokenizer()
 {
-  Lexem::Token *t = m_tokens.takeAll();
+  AST::Token *t = m_tokens.takeAll();
   while (t != NULL)
   {
-    Lexem::Token *next = t->next<Lexem::Token>();
+    AST::Token *next = t->next<AST::Token>();
     delete t;
     t = next;
   }
@@ -165,7 +165,7 @@ void Tokenizer::endToken(int row, int col)
 {
   m_region.endRow = row;
   m_region.endCol = col;
-  m_tokens.add(new Lexem::Token(m_current_token, m_is_literal, m_region));
+  m_tokens.add(new AST::Token(m_current_token, m_is_literal, m_region));
   m_current_token.clear();
   m_is_literal = false; 
 }

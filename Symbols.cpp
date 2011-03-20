@@ -1,6 +1,6 @@
 #include "Symbols.h"
 
-using namespace Lexem;
+using namespace AST;
 
 const Symbols::Definition Symbols::symbolTbl[] =
 {

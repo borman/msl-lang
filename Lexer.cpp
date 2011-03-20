@@ -2,9 +2,10 @@
 #include <cstdlib>
 #include "Lexer.h"
 #include "Symbols.h"
+#include "ASTExpr.h"
 
 using namespace std;
-using namespace Lexem;
+using namespace AST;
 
 Lexer::~Lexer()
 {
@@ -114,7 +115,7 @@ static Infix::Subtype infixType(Symbol::Subtype t)
   }
 }
 
-Lexem::Base *Lexer::consume(Token *token)
+Base *Lexer::consume(Token *token)
 {
   const string &str = token->text();
 

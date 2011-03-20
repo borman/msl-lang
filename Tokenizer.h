@@ -2,7 +2,7 @@
 #define TOKENIZER_H
 
 #include <string>
-#include "Lexem.h"
+#include "ASTLexem.h"
 #include "ListBuilder.h"
 
 class Tokenizer
@@ -29,7 +29,7 @@ class Tokenizer
     ~Tokenizer();
     
     void feed(char c); 
-    Lexem::Token *peek() { return m_tokens.takeAll(); }
+    AST::Token *peek() { return m_tokens.takeAll(); }
   private:
     enum State
     {
@@ -54,8 +54,8 @@ class Tokenizer
     State m_state;
     bool m_is_literal;
     std::string m_current_token;
-    ListBuilder<Lexem::Token> m_tokens;
-    Lexem::TextRegion m_region;
+    ListBuilder<AST::Token> m_tokens;
+    TextRegion m_region;
     unsigned int m_row;
     unsigned int m_col;
 };

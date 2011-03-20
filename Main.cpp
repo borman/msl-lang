@@ -2,8 +2,9 @@
 #include "Tokenizer.h"
 #include "Lexer.h"
 #include "Symbols.h"
+#include "ASTExpr.h"
 
-using namespace Lexem;
+using namespace AST;
 
 int main()
 {

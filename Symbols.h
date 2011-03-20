@@ -3,7 +3,7 @@
 
 #include <cassert>
 #include <string>
-#include "Lexem.h"
+#include "ASTLexem.h"
 
 class Symbols
 {
@@ -12,7 +12,7 @@ class Symbols
     {
       public:
         bool isValid() const { return index>=0; }
-        Lexem::Symbol::Subtype type() const 
+        AST::Symbol::Subtype type() const 
           { assert(index>=0); return symbolTbl[index].type; }
       private:
         Ref(int i): index(i) {}
@@ -22,13 +22,13 @@ class Symbols
     };
 
     static Ref find(const std::string &str);
-    static const char *name(Lexem::Symbol::Subtype type);
+    static const char *name(AST::Symbol::Subtype type);
 
   private:
     struct Definition
     {
       const char *str;
-      Lexem::Symbol::Subtype type;
+      AST::Symbol::Subtype type;
     };
 
     static const Definition symbolTbl[];

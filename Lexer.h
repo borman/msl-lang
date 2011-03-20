@@ -1,7 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include "Lexem.h"
+#include "ASTLexem.h"
 #include "ListBuilder.h"
 
 class Lexer
@@ -11,28 +11,28 @@ class Lexer
     {
       public:
         Exception(const std::string &text, const std::string &token, 
-                  const Lexem::TextRegion &region) 
+                  const TextRegion &region) 
           : m_text(text), m_token(token), m_region(region) {}
 
         std::string text() const { return m_text; }
         std::string token() const { return m_token; }
-        Lexem::TextRegion region() const { return m_region; }
+        TextRegion region() const { return m_region; }
 
       private:
         std::string m_text;
         std::string m_token;
-        Lexem::TextRegion m_region;
+        TextRegion m_region;
     };
 
     ~Lexer();
 
-    void feed(Lexem::Token *tokens);
-    Lexem::Base *peek() { return m_ready.takeAll(); }
+    void feed(AST::Token *tokens);
+    AST::Base *peek() { return m_ready.takeAll(); }
 
   private:
-    Lexem::Base *consume(Lexem::Token *token);
+    AST::Base *consume(AST::Token *token);
 
-    ListBuilder<Lexem::Base> m_ready;
+    ListBuilder<AST::Base> m_ready;
 };
 
 #endif // LEXER_H
