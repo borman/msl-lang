@@ -1,17 +1,27 @@
+fun on_start
+  print ["Игра начинается, игроков: ", NPlayers]
+end
+
 fun on_turn N
-  print ["Ход номер", N]
-  buy [2, RawPrice]
-  sell [production MyId, ProductionPrice]
+  do print ["Ход номер ", N]
+  do buy [2, RawPrice]
+  do sell [production MyId, ProductionPrice]
   if N%2 = 1 then
     MinProd = 2
-  else
+  end else
     MinProd = 1
   end
 
   ; Интеграл от кол-ва продукции
+  NRich = 0
   for I from 1 to NPlayers
-    $Something(I) = $Something(I) + production MyId
+    $Something(I) = $Something(I) + production I
+    NRich = NRich + if balance I > 10000 then 1 else 0
+  end
+
+  ; Бессмысленная, но сложная формула
+  ComplexForm = 2 * (NRich + MinProd/100 - 70) + MinProd * balance MyId * NPlayers
 
   ToProduce = min [2, raw MyId]
-  produce ToProduce
+  do produce ToProduce
 end
