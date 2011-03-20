@@ -7,6 +7,7 @@ datatype lexresult = VNAME of string
                    | INTEGER of int
                    | REAL of real
                    | LITERAL of string
+                   | BOOL of bool
                    | DO | FUN | END | FOR | FROM | TO | WHILE | IF | THEN | ELSE
                    | LBRACKET | RBRACKET | LPAREN | RPAREN
                    | COMMA
@@ -31,6 +32,10 @@ if => (IF);
 then => (THEN);
 else => (ELSE);
 
+true | false => (BOOL (yytext="true"));
+and => (OP AND);
+or => (OP OR);
+
 [A-Z]{TokenSym}* => (VNAME yytext);
 [a-z]{TokenSym}* => (FNAME yytext);
 \$[A-Z]{TokenSym}* => (ANAME (String.extract (yytext, 1, NONE)));
@@ -53,5 +58,3 @@ else => (ELSE);
 "*" => (OP MUL);
 "/" => (OP DIV);
 "%" => (OP MOD);
-"&" => (OP AND);
-"|" => (OP OR);

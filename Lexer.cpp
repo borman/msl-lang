@@ -1,177 +1,155 @@
-#include <cstring>
+#include <cctype>
+#include <cstdlib>
 #include "Lexer.h"
+#include "Symbols.h"
+
+using namespace std;
+using namespace Lexem;
 
 Lexer::~Lexer()
 {
-  Token *t = m_tokens.takeAll();
-  while (t != NULL)
+  Base *tokens = m_ready.takeAll();
+  while (tokens != NULL)
   {
-    Token *next = t->next<Token>();
-    delete t;
-    t = next;
+    Base *next = tokens->next<Base>();
+    delete tokens;
+    tokens = next;
   }
 }
 
-void Lexer::feed(char c)
+void Lexer::feed(Token *tokens)
 {
-  switch (m_state)
+  try
   {
-    case S_Whitespace:
-      m_state = stateWhitespace(c);
-      break;
-    case S_Quoted:
-      m_state = stateQuoted(c);
-      break;
-    case S_QuotedEsc:
-      m_state = stateQuotedEsc(c);
-      break;
-    case S_Token:
-      m_state = stateToken(c);
-      break;
-    case S_Comment:
-      m_state = stateComment(c);
-      break;
+    while (tokens != NULL)
+    {
+      m_ready.add(consume(tokens));
+      Token *next = tokens->next<Token>();
+      delete tokens;
+      tokens = next;
+    }
   }
-  if (c != '\n')
-    m_col++;
-  else
+  catch (const Lexer::Exception &)
   {
-    m_row++;
-    m_col = 0;
+    // Delete leftover
+    while (tokens != NULL)
+    {
+      Token *next = tokens->next<Token>();
+      delete tokens;
+      tokens = next;
+    }
+
+    throw;
   }
 }
 
-static inline bool istoken(char c)
+
+static bool validateIdentifier(const string &str)
 {
-  return isalnum(c) || c == '.' || c == '$' || c == '_';
+  for (size_t i=0; i<str.length(); i++)
+  {
+    const char c = str[i];
+    if (!(isalnum(c) || c == '_' ))
+      return false;
+  }
+  return true;
 }
 
-static inline bool isdelim(char c)
+static bool validateReal(const string &str, double &result)
 {
-  static const char *delimiters = "[](),+-*/%><=&|";
-  return strchr(delimiters, c) != NULL;
-}
+  bool neg = str[0] == '~';
+  const char *p = str.c_str();
+  if (neg)
+    p++;
+  if (*p == '\0')
+    return false;
 
-Lexer::State Lexer::stateWhitespace(char c)
-{
-  if (isspace(c))
-    return S_Whitespace;
-  else if (isdelim(c))
+  double v = strtod(p, const_cast<char **>(&p));
+  if (*p == '\0')
   {
-    beginToken(m_row, m_col);
-    putChar(c);
-    endToken(m_row, m_col);
-    return S_Whitespace;
-  }
-  else if (istoken(c))
-  {
-    beginToken(m_row, m_col);
-    putChar(c);
-    return S_Token;
-  }
-  else if (c == '"')
-  {
-    beginToken(m_row, m_col);
-    setLiteral();
-    return S_Quoted;
-  }
-  else if (c == ';')
-    return S_Comment;
-  else 
-    throw LexerException(m_row, m_col, "Unexpected character after whitespace");
-}
-
-Lexer::State Lexer::stateQuoted(char c)
-{
-  if (c == '"')
-  {
-    endToken(m_row, m_col);
-    return S_Whitespace;
-  }
-  else if (c == '\\')
-    return S_QuotedEsc;
-  else
-  {
-    putChar(c);
-    return S_Quoted;
-  }
-}
-
-Lexer::State Lexer::stateQuotedEsc(char c)
-{
-  if (c == 'n')
-    putChar('\n');
-  else if (c == '"')
-    putChar('"');
-  else
-    throw LexerException(m_row, m_col, "Invalid escape sequence");
-  return S_Quoted;
-}
-
-Lexer::State Lexer::stateToken(char c)
-{
-  if (istoken(c))
-  {
-    putChar(c);
-    return S_Token; 
-  }
-  else if (isspace(c))
-  {
-    endToken(m_row, m_col-1);
-    return S_Whitespace;
-  }
-  else if (isdelim(c))
-  {
-    endToken(m_row, m_col-1);
-    beginToken(m_row, m_col);
-    putChar(c);
-    endToken(m_row, m_col);
-    return S_Whitespace;
-  }
-  else if (c == '"')
-  {
-    endToken(m_row, m_col);
-    return S_Quoted;
-  }
-  else if (c == ';')
-  {
-    endToken(m_row, m_col-1);
-    return S_Comment;
+    result = neg? -v : v;
+    return true;
   }
   else
-    throw LexerException(m_row, m_col, "Unexpected character in token");
+    return false;
 }
 
-Lexer::State Lexer::stateComment(char c)
+static bool validateInt(const string &str, int &result)
 {
-  if (c == '\n')
-    return S_Whitespace;
+  bool neg = str[0] == '~';
+  const char *p = str.c_str();
+  if (neg)
+    p++;
+  if (*p == '\0')
+    return false;
+
+  double v = strtol(p, const_cast<char **>(&p), 10);
+  if (*p == '\0')
+  {
+    result = neg? -v : v;
+    return true;
+  }
   else
-    return S_Comment;
+    return false;
 }
 
-void Lexer::putChar(char c)
+Lexem::Base *Lexer::consume(Token *token)
 {
-  m_current_token += c;
-}
+  const string &str = token->text();
 
-void Lexer::beginToken(int row, int col)
-{
-  m_region.startRow = row;
-  m_region.startCol = col;
-}
+  // Literal
+  if (token->isLiteral())
+    return new Literal(token->text(), token->region());
 
-void Lexer::endToken(int row, int col)
-{
-  m_region.endRow = row;
-  m_region.endCol = col;
-  m_tokens.add(new Token(m_current_token, m_is_literal, m_region));
-  m_current_token.clear();
-  m_is_literal = false; 
-}
+  // Symbol
+  Symbols::Ref sym = Symbols::find(str);
+  if (sym.isValid())
+    return new Symbol(sym.type(), token->region());
 
-void Lexer::setLiteral()
-{
-  m_is_literal = true;
-}
+  // Boolean
+  if (str == "true")
+    return new Bool(true, token->region());
+  if (str == "false")
+    return new Bool(true, token->region());
 
+  // Identifier
+  if (islower(str[0]))
+  {
+    // Function name
+    if (!validateIdentifier(str))
+      throw Exception("Invalid function name", str, token->region());
+    return new Identifier(Identifier::Function, str, token->region());
+  }
+
+  if (isupper(str[0]))
+  {
+    // Variable name
+    if (!validateIdentifier(str))
+      throw Exception("Invalid variable name", str, token->region());
+    return new Identifier(Identifier::Variable, str, token->region());
+  }
+
+  if (str[0] == '$')
+  {
+    // Array name
+    string name = str.substr(1); // Remove leading $
+    if (!validateIdentifier(name))
+      throw Exception("Invalid array name", str, token->region());
+    return new Identifier(Identifier::Array, name, token->region());
+  }
+
+  // Real
+  if (str.find('.') != string::npos)
+  {
+    double d;
+    if (!validateReal(str, d))
+      throw Exception("Invalid real number", str, token->region());
+    return new Real(d, token->region());
+  }
+
+  // Only integer possible here
+  int i;
+  if (!validateInt(str, i))
+    throw Exception("Invalid integer number", str, token->region());
+  return new Int(i, token->region());
+}

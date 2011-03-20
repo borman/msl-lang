@@ -3,6 +3,7 @@ struct
   datatype expr = INTEGER of int
                 | REAL of real
                 | LITERAL of string
+                | BOOL of bool
                 | VAR of string
                 | FUNCCALL of string*expr
                 | ARRAYITEM of string*expr
@@ -28,6 +29,7 @@ struct
   fun readSExpr (LexerDef.INTEGER i::rest) = (INTEGER i, rest)
     | readSExpr (LexerDef.REAL r::rest) = (REAL r, rest)
     | readSExpr (LexerDef.LITERAL l::rest) = (LITERAL l, rest)
+    | readSExpr (LexerDef.BOOL b::rest) = (BOOL b, rest)
     | readSExpr (LexerDef.VNAME v::rest) = (VAR v, rest)
 
     (* FUNCCALL: fname sexpr *)

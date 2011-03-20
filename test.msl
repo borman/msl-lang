@@ -19,8 +19,17 @@ fun on_turn N
     NRich = NRich + if balance I > 10000 then 1 else 0
   end
 
+  ; While
+  N = 5
+  Ok = true
+  while N > 0
+    N = N-1
+    Ok = Ok and not (N % 6 = 5)
+  end
+
   ; Бессмысленная, но сложная формула
   ComplexForm = 2 * (NRich + MinProd/100 - 70) + MinProd * balance MyId * NPlayers
+  Numbers = 2*3 - 4/5.0 + ~49
 
   ToProduce = min [2, raw MyId]
   do produce ToProduce
