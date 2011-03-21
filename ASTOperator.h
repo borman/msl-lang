@@ -18,7 +18,7 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Let;
 
-      Let(Expression *lvalue, Expression *rvalue, const TextRegion &r)
+      Let(Expression *lvalue, Expression *rvalue, const TextRegion &r = TextRegion())
         : Operator(m_class_type, r),
           m_lvalue(lvalue), m_rvalue(rvalue) {} 
 
@@ -34,7 +34,7 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Do;
 
-      Do(Expression *expr, const TextRegion &r)
+      Do(Expression *expr, const TextRegion &r = TextRegion())
         : Operator(m_class_type, r),
           m_expr(expr) {} 
 
@@ -49,7 +49,7 @@ namespace AST
       static const Base::Type m_class_type = Base::If;
 
       If(Expression *condition, Operator *positive, 
-         Operator *negative, const TextRegion &r)
+         Operator *negative, const TextRegion &r = TextRegion())
         : Operator(m_class_type, r),
           m_condition(condition), m_positive(positive), m_negative(negative) {} 
 
@@ -68,7 +68,7 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::While;
 
-      While(Expression *condition, Operator *body, const TextRegion &r)
+      While(Expression *condition, Operator *body, const TextRegion &r = TextRegion())
         : Operator(m_class_type, r),
           m_condition(condition), m_body(body) {} 
 
@@ -85,7 +85,7 @@ namespace AST
       static const Base::Type m_class_type = Base::For;
 
       For(AST::Variable *var, Expression *from, Expression *to,
-          Operator *body, const TextRegion &r)
+          Operator *body, const TextRegion &r = TextRegion())
         : Operator(m_class_type, r),
           m_var(var), m_from(from), m_to(to), m_body(body) {} 
 
@@ -105,7 +105,7 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Fun;
 
-      Fun(const std::string &name, Base *arg, Base *body, const TextRegion &r)
+      Fun(const std::string &name, Base *arg, Base *body, const TextRegion &r = TextRegion())
         : Operator(m_class_type, r),
           m_name(name), m_arg(arg), m_body(body) {} 
 
