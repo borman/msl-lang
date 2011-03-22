@@ -39,6 +39,7 @@ class Parser
     void expectLValue(AST::Expression *expr);
     void expectEqualSign();
 
+    AST::Expression *fold(AST::Expression *formula, int prio);
     AST::Expression *foldAll(AST::Expression *formula);
 
     template<class T>

@@ -51,13 +51,15 @@ namespace AST
       template<class T>
         T *as() 
         { 
+          /*
           assert(T::m_class_type == None || T::m_class_type==type()); 
+          */
           return static_cast<T *>(this); 
         }
       template<class T>
         T *next() { return m_next==NULL? NULL : m_next->as<T>(); }
 
-      void setNext(Base *l) { m_next = l; }
+      Base *setNext(Base *l) { m_next = l; return this; }
 
     private:
       Type m_type;

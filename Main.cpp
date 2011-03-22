@@ -10,7 +10,7 @@ using namespace AST;
 
 static void printTokens(Base *tokens);
 static void printAST(AST::Base *ast, unsigned int n_indent = 0);
-static void printASTBlock(Base *ast, unsigned int n_indent = 0);
+static void printASTBlock(const char *name, Base *ast, unsigned int n_indent = 0);
 
 int main()
 {
@@ -29,7 +29,7 @@ int main()
     printTokens(tokens);
     parser.feed(tokens);
     Fun *funs = parser.peek();
-    printASTBlock(funs);
+    printASTBlock("program", funs);
     printf("\n");
   }
   catch (const Tokenizer::Exception &e)
@@ -139,14 +139,16 @@ static void indent(unsigned int n)
     printf("  ");
 } 
 
-static void printASTBlock(Base *ast, unsigned int n_indent)
+static void printASTBlock(const char *name, Base *ast, unsigned int n_indent)
 {
+  indent(n_indent);
+  printf("(%s", name);
   for (Base *i = ast; i!=NULL; i=i->next<Base>())
   {
-    if (i != ast)
-      printf("\n");
-    printAST(i, n_indent);
+    printf("\n");
+    printAST(i, n_indent+1);
   }
+  printf(")");
 }
 
 static void printAST(Base *ast, unsigned int n_indent)
@@ -213,7 +215,7 @@ static void printAST(Base *ast, unsigned int n_indent)
         if (tuple->contents() != NULL)
         {
           printf("\n");
-          printASTBlock(tuple->contents(), n_indent+1);
+          printASTBlock("tuple", tuple->contents(), n_indent+1);
         }
         printf(")");
       } break;
@@ -252,11 +254,11 @@ static void printAST(Base *ast, unsigned int n_indent)
         printf("(if\n");
         printAST(sel->condition(), n_indent+1);
         printf("\n");
-        printASTBlock(sel->positive(), n_indent+1);
+        printASTBlock("block", sel->positive(), n_indent+1);
         if (sel->negative() != NULL)
         {
           printf("\n");
-          printASTBlock(sel->negative(), n_indent+1);
+          printASTBlock("block", sel->negative(), n_indent+1);
         }
         printf(")");
       } break;
@@ -267,7 +269,7 @@ static void printAST(Base *ast, unsigned int n_indent)
         printf("(if\n");
         printAST(sel->condition(), n_indent+1);
         printf("\n");
-        printASTBlock(sel->body(), n_indent+1);
+        printASTBlock("block", sel->body(), n_indent+1);
         printf(")");
       } break;
 
@@ -281,7 +283,7 @@ static void printAST(Base *ast, unsigned int n_indent)
         printf("\n");
         printAST(sel->to(), n_indent+1);
         printf("\n");
-        printASTBlock(sel->body(), n_indent+1);
+        printASTBlock("block", sel->body(), n_indent+1);
         printf(")");
       } break;
 
@@ -291,7 +293,7 @@ static void printAST(Base *ast, unsigned int n_indent)
         printf("(fun %s\n", fun->name().c_str());
         printAST(fun->arg(), n_indent+1);
         printf("\n");
-        printASTBlock(fun->body(), n_indent+1);
+        printASTBlock("block", fun->body(), n_indent+1);
         printf(")");
       } break;
 

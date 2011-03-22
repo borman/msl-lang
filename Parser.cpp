@@ -148,7 +148,7 @@ Expression *Parser::readSExpr()
   }
   else if (nextIsSym(Symbol::LBracket))
   {
-    ListBuilder<AST::Expression> exprs;
+    ListBuilder<Expression> exprs;
     expectSym(Symbol::LBracket);
     while (!nextIsSym(Symbol::RBracket))
     {
@@ -184,19 +184,62 @@ int infixPriority(Infix::Subtype t)
   return 0;
 }
 
+Expression *Parser::fold(Expression *formula, int prio)
+{
+  ListBuilder<Expression> folded;
+  Expression *tail = formula;
+  while (tail != NULL)
+  {
+    // Detach first
+    Expression *first = tail;
+    tail = tail->next<Expression>();
+    first->setNext(NULL);
+
+    if (tail == NULL)
+      folded.add(first);
+    else
+    {
+      // Detach second
+      Infix *op = tail->as<Infix>();
+      tail = tail->next<Expression>();
+      op->setNext(NULL);
+
+      if (prio == infixPriority(op->subtype()))
+      {
+        // Detach third
+        Expression *third = tail;
+        tail = tail->next<Expression>();
+        third->setNext(NULL);
+
+        // Reattach bound
+        op->bind(first, third);
+        op->setNext(tail);
+        tail = op;
+      }
+      else
+      {
+        folded.add(first);
+        folded.add(op);
+      }
+    }
+  }
+  return folded.takeAll();
+}
+
 Expression *Parser::foldAll(Expression *formula)
 {
-  // STUB
+  for (int i=1; i<5; i++)
+    formula = fold(formula, i);
   return formula;
 }
 
-bool Parser::nextIsSym(AST::Symbol::Subtype t)
+bool Parser::nextIsSym(Symbol::Subtype t)
 {
   return nextIs(Base::Symbol)
       && head<Symbol>()->subtype() == t;
 }
 
-void Parser::expectSym(AST::Symbol::Subtype t)
+void Parser::expectSym(Symbol::Subtype t)
 {
   if (!nextIsSym(t))
     throw Exception("Symbol expectation failed", m_tokens);
@@ -204,13 +247,13 @@ void Parser::expectSym(AST::Symbol::Subtype t)
     popHead();
 }
 
-bool Parser::nextIs(AST::Base::Type t)
+bool Parser::nextIs(Base::Type t)
 {
   return head<Base>() != NULL 
       && head<Base>()->type() == t;
 }
 
-void Parser::expect(AST::Base::Type t)
+void Parser::expect(Base::Type t)
 {
   if (!nextIs(t))
     throw Exception("Class expectation failed", m_tokens);
