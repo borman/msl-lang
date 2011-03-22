@@ -1,5 +1,5 @@
-fun on_start
-  print ["Игра начинается, игроков: ", NPlayers]
+fun on_start []
+  do print ["Игра начинается, игроков: ", NPlayers]
 end
 
 fun on_turn N

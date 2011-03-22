@@ -27,6 +27,7 @@ Fun *Parser::readFun()
   popHead();
 
   Expression *arg = readSExpr();
+  expectLValue(arg);
   Operator *body = readBlock();
 
   return new Fun(name, arg, body);
@@ -110,8 +111,10 @@ Expression *Parser::readExpr()
 Expression *Parser::readSExpr()
 {
   if (nextIs(Base::Int) || nextIs(Base::Real) || nextIs(Base::Bool)
-      || nextIs(Base::Literal) || nextIs(Base::Variable))
+   || nextIs(Base::Literal) || nextIs(Base::Variable))
+  {
     return static_cast<Expression *>(takeHead<Base>());
+  }
   else if (nextIs(Base::FuncCall))
   {
     FuncCall *func = takeHead<FuncCall>();
@@ -162,6 +165,24 @@ Expression *Parser::readSExpr()
 }
 
 // ====== HELPERS ======
+
+int infixPriority(Infix::Subtype t)
+{
+  switch (t)
+  {
+    case Infix::Mul: return 1;
+    case Infix::Div: return 1;
+    case Infix::Mod: return 1;
+    case Infix::Plus: return 2;
+    case Infix::Minus: return 2;
+    case Infix::Equals: return 3;
+    case Infix::Less: return 3;
+    case Infix::Greater: return 3;
+    case Infix::And: return 4;
+    case Infix::Or: return 4;
+  }
+  return 0;
+}
 
 Expression *Parser::foldAll(Expression *formula)
 {
