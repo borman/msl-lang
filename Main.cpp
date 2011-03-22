@@ -1,39 +1,14 @@
 #include <cstdio>
 #include "Tokenizer.h"
 #include "Lexer.h"
+#include "Parser.h"
 #include "Symbols.h"
 #include "ASTExpr.h"
 
 using namespace AST;
 
-int main()
+static void printTokens(Base *tokens)
 {
-  Tokenizer tokenizer;
-  Lexer lexer;
-  
-  try
-  {
-    int c;
-    while ((c = getchar()) != EOF)
-      tokenizer.feed(c);
-    tokenizer.feed('\n');
-    lexer.feed(tokenizer.peek());
-  }
-  catch (const Tokenizer::Exception &e)
-  {
-    printf("stdin:%u:%u: Tokenizer error: %s\n", e.row()+1, e.col()+1, e.text().c_str());
-    return 1;
-  }
-  catch (const Lexer::Exception &e)
-  {
-    const TextRegion &r = e.region();
-    printf("stdin:%u:%u-%u-%u: Lexer error: %s in \"%s\"\n",
-           r.startRow, r.startCol, r.endRow, r.endCol,
-           e.text().c_str(), e.token().c_str());
-    return 1;
-  }
-
-  Base *tokens = lexer.peek();
   for(Base *t = tokens; t != NULL; t = t->next<Base>())
   {
     const TextRegion &r = t->region();
@@ -42,6 +17,13 @@ int main()
            r.endRow, r.endCol);
     switch (t->type())
     {
+      case Base::Token:
+        if (t->as<Token>()->isLiteral())
+        printf("TOK%c %s", 
+            t->as<Token>()->isLiteral()? 'L':' ',
+            t->as<Token>()->text().c_str());
+        break;
+
       case Base::Symbol:
         printf("SYM  %s", Symbols::name(t->as<Symbol>()->subtype()));
         break;
@@ -82,6 +64,43 @@ int main()
         printf("UNK");
     }
     printf("\n");
+  }
+}
+
+int main()
+{
+  Tokenizer tokenizer;
+  Lexer lexer;
+  Parser parser;
+  
+  try
+  {
+    int c;
+    while ((c = getchar()) != EOF)
+      tokenizer.feed(c);
+    tokenizer.feed('\n');
+    lexer.feed(tokenizer.peek());
+    parser.feed(lexer.peek());
+    Fun *funs = parser.peek();
+  }
+  catch (const Tokenizer::Exception &e)
+  {
+    printf("stdin:%u:%u: Tokenizer error: %s\n", e.row()+1, e.col()+1, e.text().c_str());
+    return 1;
+  }
+  catch (const Lexer::Exception &e)
+  {
+    const TextRegion &r = e.region();
+    printf("stdin:%u:%u-%u-%u: Lexer error: %s in \"%s\"\n",
+           r.startRow, r.startCol, r.endRow, r.endCol,
+           e.text().c_str(), e.token().c_str());
+    return 1;
+  }
+  catch (const Parser::Exception &e)
+  {
+    printf("Parser error: %s\n", e.text().c_str());
+    printTokens(e.tokens());
+    return 1;
   }
 
   return 0;

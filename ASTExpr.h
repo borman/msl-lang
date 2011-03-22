@@ -128,7 +128,7 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Tuple;
 
-      Tuple(Expression *contents, const TextRegion &r)
+      Tuple(Expression *contents, const TextRegion &r = TextRegion())
         : Expression(m_class_type, r), 
           m_contents(contents) {} 
 
@@ -143,7 +143,7 @@ namespace AST
       static const Base::Type m_class_type = Base::Selector;
 
       Selector(Expression *condition, Expression *positive, 
-               Expression *negative, const TextRegion &r)
+               Expression *negative, const TextRegion &r = TextRegion())
         : Expression(m_class_type, r),
           m_condition(condition), m_positive(positive), m_negative(negative) {} 
 

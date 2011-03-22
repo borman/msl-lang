@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "Parser.h"
 
 using namespace AST;
@@ -93,9 +94,129 @@ Operator *Parser::readOperator()
 
 Expression *Parser::readExpr()
 {
+  ListBuilder<Expression> sexprs;
+  bool finished = false;
+  do
+  {
+    sexprs.add(readSExpr());
+    if (nextIs(Base::Infix))
+      sexprs.add(takeHead<Infix>());
+    else
+      finished = true;
+  } while (!finished);
+  return foldAll(sexprs.takeAll());
 }
 
 Expression *Parser::readSExpr()
 {
+  if (nextIs(Base::Int) || nextIs(Base::Real) || nextIs(Base::Bool)
+      || nextIs(Base::Literal) || nextIs(Base::Variable))
+    return static_cast<Expression *>(takeHead<Base>());
+  else if (nextIs(Base::FuncCall))
+  {
+    FuncCall *func = takeHead<FuncCall>();
+    Expression *arg = readSExpr();
+    func->bind(arg);
+    return func;
+  }
+  else if (nextIs(Base::ArrayItem))
+  {
+    ArrayItem *array = takeHead<ArrayItem>();
+    Expression *arg = readSExpr();
+    array->bind(arg);
+    return array;
+  }
+  else if (nextIsSym(Symbol::If))
+  {
+    expectSym(Symbol::If);
+    Expression *cond = readExpr();
+    expectSym(Symbol::Then);
+    Expression *positive = readExpr();
+    expectSym(Symbol::Else);
+    Expression *negative = readExpr();
+    return new Selector(cond, positive, negative);
+  }
+  else if (nextIsSym(Symbol::LParen))
+  {
+    expectSym(Symbol::LParen);
+    Expression *inside = readExpr();
+    expectSym(Symbol::RParen);
+    return inside;
+  }
+  else if (nextIsSym(Symbol::LBracket))
+  {
+    ListBuilder<AST::Expression> exprs;
+    expectSym(Symbol::LBracket);
+    while (!nextIsSym(Symbol::RBracket))
+    {
+      exprs.add(readExpr());
+      if (nextIsSym(Symbol::Comma))
+        expectSym(Symbol::Comma);
+      else
+        break;
+    }
+    expectSym(Symbol::RBracket);
+    return new Tuple(exprs.takeAll());
+  }
+  else throw Exception("Expression expected", m_tokens);
+}
+
+// ====== HELPERS ======
+
+Expression *Parser::foldAll(Expression *formula)
+{
+  // STUB
+  return formula;
+}
+
+bool Parser::nextIsSym(AST::Symbol::Subtype t)
+{
+  return nextIs(Base::Symbol)
+      && head<Symbol>()->subtype() == t;
+}
+
+void Parser::expectSym(AST::Symbol::Subtype t)
+{
+  if (!nextIsSym(t))
+    throw Exception("Symbol expectation failed", m_tokens);
+  else
+    popHead();
+}
+
+bool Parser::nextIs(AST::Base::Type t)
+{
+  return head<Base>() != NULL 
+      && head<Base>()->type() == t;
+}
+
+void Parser::expect(AST::Base::Type t)
+{
+  if (!nextIs(t))
+    throw Exception("Class expectation failed", m_tokens);
+}
+
+void Parser::expectLValue(Expression *expr)
+{
+  if (expr->type() == Base::Variable || expr->type() == Base::ArrayItem)
+    return; // Ok
+  else if (expr->type() == Base::Tuple)
+  {
+    Expression *contents = expr->as<Tuple>()->contents();
+    while (contents != NULL)
+    {
+      expectLValue(contents);
+      contents = contents->next<Expression>();
+    }
+  }
+  else
+    throw Exception("LValue expected", m_tokens);
+}
+
+void Parser::expectEqualSign()
+{
+  if (nextIs(Base::Infix) && head<Infix>()->subtype() == Infix::Equals)
+    popHead();
+  else
+    throw Exception("Assignment operator expected", m_tokens);
 }
 

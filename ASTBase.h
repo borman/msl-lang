@@ -26,7 +26,6 @@ namespace AST
         FuncCall,
         ArrayItem,
         Tuple,
-        Expression,
         Selector,
         Infix,
         // Higher-level items
