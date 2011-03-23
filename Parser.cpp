@@ -3,6 +3,9 @@
 
 using namespace AST;
 
+// FIXME: Memory leak on exception
+// TODO: Track text regions
+
 void Parser::feed(Base *tokens)
 {
   m_token_queue.add(tokens);
@@ -20,7 +23,7 @@ Fun *Parser::peek()
 
 Fun *Parser::readFun()
 {
-  expectSym(Symbol::Fun);
+  consumeSym(Symbol::Fun);
   
   expect(Base::FuncCall);
   const std::string name = head<FuncCall>()->name();
@@ -38,60 +41,85 @@ Operator *Parser::readBlock()
   ListBuilder<Operator> body;
   while (!nextIsSym(Symbol::End))
     body.add(readOperator());
-  expectSym(Symbol::End);
+  consumeSym(Symbol::End);
   return body.takeAll();
 }
 
+// ====== OPERATORS
+
+// General case
 Operator *Parser::readOperator()
 {
   if (nextIsSym(Symbol::Do))
-  {
-    expectSym(Symbol::Do);
-    Expression *expr = readExpr();
-    return new Do(expr);
-  }
+    return readOperatorDo();
   else if (nextIsSym(Symbol::If))
-  {
-    expectSym(Symbol::If);
-    Expression *cond = readExpr();
-    expectSym(Symbol::Then);
-    Operator *positive = readBlock();
-    Operator *negative = NULL;
-    if (nextIsSym(Symbol::Else))
-    {
-      expectSym(Symbol::Else);
-      negative = readBlock();
-    }
-    return new If(cond, positive, negative);
-  }
+    return readOperatorIf();
   else if (nextIsSym(Symbol::For))
-  {
-    expectSym(Symbol::For);
-    expect(Base::Variable);
-    Variable *var = takeHead<Variable>();
-    expectSym(Symbol::From);
-    Expression *from = readExpr();
-    expectSym(Symbol::To);
-    Expression *to = readExpr();
-    Operator *body = readBlock();
-    return new For(var, from, to, body);
-  }
+    return readOperatorFor();
   else if (nextIsSym(Symbol::While))
-  {
-    expectSym(Symbol::While);
-    Expression *cond = readExpr();
-    Operator *body = readBlock();
-    return new While(cond, body);
-  }
+    return readOperatorWhile();
   else // <LEXPR> = <EXPR>
-  {
-    Expression *lvalue = readSExpr();
-    expectLValue(lvalue);
-    expectEqualSign();
-    Expression *rvalue = readExpr();
-    return new Let(lvalue, rvalue);
-  }
+    return readOperatorLet();
 }
+
+// DO
+Operator *Parser::readOperatorDo()
+{
+  consumeSym(Symbol::Do);
+  Expression *expr = readExpr();
+  return new Do(expr);
+}
+
+// IF
+Operator *Parser::readOperatorIf()
+{
+  consumeSym(Symbol::If);
+  Expression *cond = readExpr();
+  consumeSym(Symbol::Then);
+  Operator *positive = readBlock();
+  Operator *negative = NULL;
+  if (nextIsSym(Symbol::Else))
+  {
+    consumeSym(Symbol::Else);
+    negative = readBlock();
+  }
+  return new If(cond, positive, negative);
+}
+
+// FOR
+Operator *Parser::readOperatorFor()
+{
+  consumeSym(Symbol::For);
+  expect(Base::Variable);
+  Variable *var = takeHead<Variable>();
+  consumeSym(Symbol::From);
+  Expression *from = readExpr();
+  consumeSym(Symbol::To);
+  Expression *to = readExpr();
+  Operator *body = readBlock();
+  return new For(var, from, to, body);
+}
+
+// WHILE
+Operator *Parser::readOperatorWhile()
+{
+  consumeSym(Symbol::While);
+  Expression *cond = readExpr();
+  Operator *body = readBlock();
+  return new While(cond, body);
+}
+
+// LET
+Operator *Parser::readOperatorLet()
+{
+  Expression *lvalue = readSExpr();
+  expectLValue(lvalue);
+  expectEqualSign();
+  Expression *rvalue = readExpr();
+  return new Let(lvalue, rvalue);
+}
+
+// ===== EXPRESSIONS
 
 Expression *Parser::readExpr()
 {
@@ -116,52 +144,73 @@ Expression *Parser::readSExpr()
     return static_cast<Expression *>(takeHead<Base>());
   }
   else if (nextIs(Base::FuncCall))
-  {
-    FuncCall *func = takeHead<FuncCall>();
-    Expression *arg = readSExpr();
-    func->bind(arg);
-    return func;
-  }
+    return readSExprFuncCall();
   else if (nextIs(Base::ArrayItem))
-  {
-    ArrayItem *array = takeHead<ArrayItem>();
-    Expression *arg = readSExpr();
-    array->bind(arg);
-    return array;
-  }
+    return readSExprArrayItem();
   else if (nextIsSym(Symbol::If))
-  {
-    expectSym(Symbol::If);
-    Expression *cond = readExpr();
-    expectSym(Symbol::Then);
-    Expression *positive = readExpr();
-    expectSym(Symbol::Else);
-    Expression *negative = readExpr();
-    return new Selector(cond, positive, negative);
-  }
+    return readSExprSelector();
   else if (nextIsSym(Symbol::LParen))
-  {
-    expectSym(Symbol::LParen);
-    Expression *inside = readExpr();
-    expectSym(Symbol::RParen);
-    return inside;
-  }
+    return readSExprSubexpr();
   else if (nextIsSym(Symbol::LBracket))
+    return readSExprTuple();
+  else 
+    throw Exception("Expression expected", m_tokens, m_tokens->region());
+}
+
+// FUNCTION CALL
+Expression *Parser::readSExprFuncCall()
+{
+  FuncCall *func = takeHead<FuncCall>();
+  Expression *arg = readSExpr();
+  func->bind(arg);
+  return func;
+}
+
+// ARRAY ITEM
+Expression *Parser::readSExprArrayItem()
+{
+  ArrayItem *array = takeHead<ArrayItem>();
+  Expression *arg = readSExpr();
+  array->bind(arg);
+  return array;
+}
+
+// SELECTOR
+Expression *Parser::readSExprSelector()
+{
+  consumeSym(Symbol::If);
+  Expression *cond = readExpr();
+  consumeSym(Symbol::Then);
+  Expression *positive = readExpr();
+  consumeSym(Symbol::Else);
+  Expression *negative = readExpr();
+  return new Selector(cond, positive, negative);
+}
+
+// (SUBEXPRESSION)
+Expression *Parser::readSExprSubexpr()
+{
+  consumeSym(Symbol::LParen);
+  Expression *inside = readExpr();
+  consumeSym(Symbol::RParen);
+  return inside;
+}
+
+// TUPLE
+Expression *Parser::readSExprTuple()
+{
+  ListBuilder<Expression> exprs;
+  consumeSym(Symbol::LBracket);
+  while (!nextIsSym(Symbol::RBracket))
   {
-    ListBuilder<Expression> exprs;
-    expectSym(Symbol::LBracket);
-    while (!nextIsSym(Symbol::RBracket))
-    {
-      exprs.add(readExpr());
-      if (nextIsSym(Symbol::Comma))
-        expectSym(Symbol::Comma);
-      else
-        break;
-    }
-    expectSym(Symbol::RBracket);
-    return new Tuple(exprs.takeAll());
+    exprs.add(readExpr());
+    if (nextIsSym(Symbol::Comma))
+      consumeSym(Symbol::Comma);
+    else
+      break;
   }
-  else throw Exception("Expression expected", m_tokens);
+  consumeSym(Symbol::RBracket);
+  return new Tuple(exprs.takeAll());
 }
 
 // ====== HELPERS ======
@@ -239,7 +288,7 @@ bool Parser::nextIsSym(Symbol::Subtype t)
       && head<Symbol>()->subtype() == t;
 }
 
-void Parser::expectSym(Symbol::Subtype t)
+void Parser::consumeSym(Symbol::Subtype t)
 {
   if (!nextIsSym(t))
     throw Exception("Symbol expectation failed", m_tokens);

@@ -3,7 +3,7 @@
 
 #include <cassert>
 #include <string>
-#include "ASTLexem.h"
+#include "AST.h"
 
 class Symbols
 {

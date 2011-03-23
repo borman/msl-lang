@@ -3,10 +3,9 @@
 #include "Lexer.h"
 #include "Parser.h"
 #include "Symbols.h"
-#include "ASTExpr.h"
+#include "AST.h"
 
 using namespace AST;
-
 
 static void printTokens(Base *tokens);
 static void printAST(AST::Base *ast, unsigned int n_indent = 0);
@@ -29,8 +28,11 @@ int main()
     printTokens(tokens);
     parser.feed(tokens);
     Fun *funs = parser.peek();
+
     printASTBlock("program", funs);
     printf("\n");
+
+    deleteChain(funs);
   }
   catch (const Tokenizer::Exception &e)
   {
@@ -60,16 +62,17 @@ static const char *infix(Infix::Subtype t)
 {
   switch (t)
   {
-    case Infix::Mul: return "*";
-    case Infix::Div: return "/";
-    case Infix::Mod: return "mod";
-    case Infix::Plus: return "+";
-    case Infix::Minus: return "-";
     case Infix::Equals: return "=";
     case Infix::Less: return "<";
     case Infix::Greater: return ">";
+    case Infix::Plus: return "+";
+    case Infix::Minus: return "-";
+    case Infix::Mul: return "*";
+    case Infix::Div: return "/";
+    case Infix::Mod: return "mod";
     case Infix::And: return "and";
     case Infix::Or: return "or";
+    default: return NULL;
   }
 }
 

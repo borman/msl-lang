@@ -2,7 +2,7 @@
 #define TOKENIZER_H
 
 #include <string>
-#include "ASTLexem.h"
+#include "AST.h"
 #include "ListBuilder.h"
 
 class Tokenizer

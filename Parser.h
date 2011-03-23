@@ -2,9 +2,7 @@
 #define PARSER_H
 
 #include <string>
-#include "ASTLexem.h"
-#include "ASTExpr.h"
-#include "ASTOperator.h"
+#include "AST.h"
 #include "ListBuilder.h"
 
 class Parser
@@ -13,13 +11,16 @@ class Parser
     class Exception
     {
       public:
-        Exception(const std::string &text, AST::Base *tokens)
-          : m_text(text), m_tokens(tokens) {}
+        Exception(const std::string &text, AST::Base *tokens, 
+                  const TextRegion &region = TextRegion())
+          : m_text(text), m_tokens(tokens), m_region(region) {}
         std::string text() const { return m_text; }
         AST::Base *tokens() const { return m_tokens; }
+        TextRegion region() const { return m_region; }
       private:
         std::string m_text;
         AST::Base *m_tokens;
+        TextRegion m_region;
     };
 
     void feed(AST::Base *tokens);
@@ -29,11 +30,21 @@ class Parser
     AST::Fun *readFun();
     AST::Operator *readBlock();
     AST::Operator *readOperator();
+    AST::Operator *readOperatorDo();
+    AST::Operator *readOperatorIf();
+    AST::Operator *readOperatorFor();
+    AST::Operator *readOperatorWhile();
+    AST::Operator *readOperatorLet();
     AST::Expression *readExpr();
     AST::Expression *readSExpr();
+    AST::Expression *readSExprFuncCall();
+    AST::Expression *readSExprArrayItem();
+    AST::Expression *readSExprSelector();
+    AST::Expression *readSExprSubexpr();
+    AST::Expression *readSExprTuple();
 
     bool nextIsSym(AST::Symbol::Subtype t);
-    void expectSym(AST::Symbol::Subtype t);
+    void consumeSym(AST::Symbol::Subtype t);
     bool nextIs(AST::Base::Type t);
     void expect(AST::Base::Type t);
     void expectLValue(AST::Expression *expr);

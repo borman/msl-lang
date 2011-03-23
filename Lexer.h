@@ -1,7 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include "ASTLexem.h"
+#include "AST.h"
 #include "ListBuilder.h"
 
 class Lexer
