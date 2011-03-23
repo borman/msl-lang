@@ -105,17 +105,17 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Fun;
 
-      Fun(const std::string &name, Base *arg, Base *body, const TextRegion &r = TextRegion())
+      Fun(const std::string &name, Expression *arg, Operator *body, const TextRegion &r = TextRegion())
         : Base(m_class_type, r),
           m_name(name), m_arg(arg), m_body(body) {} 
 
       std::string name() const { return m_name; }
-      Base *arg() const { return m_arg; }
-      Base *body() const { return m_body; }
+      Expression *arg() const { return m_arg; }
+      Operator *body() const { return m_body; }
     private:
       std::string m_name;
-      Base *m_arg;
-      Base *m_body;
+      Expression *m_arg;
+      Operator *m_body;
   };
 }
 

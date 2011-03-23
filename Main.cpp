@@ -2,25 +2,23 @@
 #include "Tokenizer.h"
 #include "Lexer.h"
 #include "Parser.h"
+#include "Compiler.h"
 #include "Symbols.h"
 #include "AST.h"
 #include "ASTPrint.h"
 
 const char *tokensFileName = "tokens.txt";
 const char *astFileName = "ast.l";
+const char *asmFileName = "asm.lst";
 
 using namespace AST;
 
 int main()
 {
-  Tokenizer tokenizer;
-  Lexer lexer;
-  Parser parser;
-
   FILE *tokensFile = fopen(tokensFileName, "w");
   if (tokensFile == NULL)
   {
-    printf("Failed to open tokens file \"%s\", defaulting to stderr\n", tokensFileName);
+    printf("Failed to open token output file \"%s\", defaulting to stderr\n", tokensFileName);
     tokensFile = stderr;
   }
   else
@@ -29,14 +27,28 @@ int main()
   FILE *astFile = fopen(astFileName, "w");
   if (astFile == NULL)
   {
-    printf("Failed to open AST file \"%s\", defaulting to stderr\n", astFileName);
+    printf("Failed to open AST output file \"%s\", defaulting to stderr\n", astFileName);
     astFile = stderr;
   }
   else
     printf("Saving AST to \"%s\"\n", astFileName);
+
+  FILE *asmFile = fopen(asmFileName, "w");
+  if (asmFile == NULL)
+  {
+    printf("Failed to open ASM output file \"%s\", defaulting to stderr\n", asmFileName);
+    asmFile = stderr;
+  }
+  else
+    printf("Saving ASM to \"%s\"\n", asmFileName);
   
   try
   {
+    Tokenizer tokenizer;
+    Lexer lexer;
+    Parser parser;
+    Compiler compiler(asmFile);
+
     int c;
     while ((c = getchar()) != EOF)
       tokenizer.feed(c);
@@ -52,6 +64,9 @@ int main()
 
     printBlock(astFile, "program", funs);
     fprintf(astFile, "\n");
+
+    compiler.feed(funs);
+    printf("Program compiled ok\n");
 
     deleteChain(funs);
   }
@@ -80,6 +95,8 @@ int main()
     fclose(tokensFile);
   if (astFile != stderr)
     fclose(astFile);
+  if (asmFile != stderr)
+    fclose(asmFile);
 
   return 0;
 }
