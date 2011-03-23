@@ -100,13 +100,13 @@ namespace AST
       Operator *m_body;
   };
 
-  class Fun: public Operator
+  class Fun: public Base
   {
     public:
       static const Base::Type m_class_type = Base::Fun;
 
       Fun(const std::string &name, Base *arg, Base *body, const TextRegion &r = TextRegion())
-        : Operator(m_class_type, r),
+        : Base(m_class_type, r),
           m_name(name), m_arg(arg), m_body(body) {} 
 
       std::string name() const { return m_name; }

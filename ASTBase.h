@@ -7,6 +7,36 @@
 
 namespace AST
 {
+  /**
+   * A base class for AST nodes.
+   * Node hierarchy:
+   *
+   * Base
+   * |
+   * | // Lexems
+   * |- Token
+   * |- Symbol
+   * | 
+   * |- Expression
+   * |  |- Int
+   * |  |- Bool
+   * |  |- Real
+   * |  |- Literal
+   * |  |- Variable
+   * |  |- ArrayItem
+   * |  |- Tuple
+   * |  |- Selector
+   * |  `- Infix
+   * | 
+   * |- Operator
+   * |  |- Do
+   * |  |- Let
+   * |  |- If
+   * |  |- While
+   * |  `- For
+   * |
+   * `- Fun
+   */
   class Base
   {
     public:
@@ -14,26 +44,13 @@ namespace AST
       {
         None,
         // Intermediate forms
-        Token,
-        Symbol, 
+        Token, Symbol, 
         // Constants
-        Literal,
-        Real,
-        Int,
-        Bool,
+        Literal, Real, Int, Bool,
         // Complex expression items
-        Variable,
-        FuncCall,
-        ArrayItem,
-        Tuple,
-        Selector,
-        Infix,
+        Variable, FuncCall, ArrayItem, Tuple, Selector, Infix,
         // Higher-level items
-        Let,
-        Do,
-        If,
-        While,
-        For,
+        Let, Do, If, While, For,
         // Top-level item
         Fun
       };
@@ -48,6 +65,7 @@ namespace AST
       TextRegion region() const { return m_region; }
 
       // Simple runtime type-checking
+      // FIXME: Too dumb. Disabled.
       template<class T>
         T *as() 
         { 

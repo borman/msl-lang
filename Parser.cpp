@@ -29,9 +29,9 @@ Fun *Parser::readFun()
   const std::string name = head<FuncCall>()->name();
   popHead();
 
-  Expression *arg = readSExpr();
-  expectLValue(arg);
-  Operator *body = readBlock();
+  SafePtr<Expression> arg(readSExpr());
+  expectLValue(arg.keep());
+  SafePtr<Operator> body(readBlock());
 
   return new Fun(name, arg, body);
 }
@@ -66,7 +66,7 @@ Operator *Parser::readOperator()
 Operator *Parser::readOperatorDo()
 {
   consumeSym(Symbol::Do);
-  Expression *expr = readExpr();
+  SafePtr<Expression> expr(readExpr());
   return new Do(expr);
 }
 
@@ -74,10 +74,10 @@ Operator *Parser::readOperatorDo()
 Operator *Parser::readOperatorIf()
 {
   consumeSym(Symbol::If);
-  Expression *cond = readExpr();
+  SafePtr<Expression> cond(readExpr());
   consumeSym(Symbol::Then);
-  Operator *positive = readBlock();
-  Operator *negative = NULL;
+  SafePtr<Operator> positive(readBlock());
+  SafePtr<Operator> negative(NULL);
   if (nextIsSym(Symbol::Else))
   {
     consumeSym(Symbol::Else);
@@ -91,12 +91,12 @@ Operator *Parser::readOperatorFor()
 {
   consumeSym(Symbol::For);
   expect(Base::Variable);
-  Variable *var = takeHead<Variable>();
+  SafePtr<Variable> var(takeHead<Variable>());
   consumeSym(Symbol::From);
-  Expression *from = readExpr();
+  SafePtr<Expression> from(readExpr());
   consumeSym(Symbol::To);
-  Expression *to = readExpr();
-  Operator *body = readBlock();
+  SafePtr<Expression> to(readExpr());
+  SafePtr<Operator> body(readBlock());
   return new For(var, from, to, body);
 }
 
@@ -104,18 +104,18 @@ Operator *Parser::readOperatorFor()
 Operator *Parser::readOperatorWhile()
 {
   consumeSym(Symbol::While);
-  Expression *cond = readExpr();
-  Operator *body = readBlock();
+  SafePtr<Expression> cond(readExpr());
+  SafePtr<Operator> body(readBlock());
   return new While(cond, body);
 }
 
 // LET
 Operator *Parser::readOperatorLet()
 {
-  Expression *lvalue = readSExpr();
+  SafePtr<Expression> lvalue(readSExpr());
   expectLValue(lvalue);
   expectEqualSign();
-  Expression *rvalue = readExpr();
+  SafePtr<Expression> rvalue(readExpr());
   return new Let(lvalue, rvalue);
 }
 
@@ -160,8 +160,8 @@ Expression *Parser::readSExpr()
 // FUNCTION CALL
 Expression *Parser::readSExprFuncCall()
 {
-  FuncCall *func = takeHead<FuncCall>();
-  Expression *arg = readSExpr();
+  SafePtr<FuncCall> func(takeHead<FuncCall>());
+  SafePtr<Expression> arg(readSExpr());
   func->bind(arg);
   return func;
 }
@@ -169,8 +169,8 @@ Expression *Parser::readSExprFuncCall()
 // ARRAY ITEM
 Expression *Parser::readSExprArrayItem()
 {
-  ArrayItem *array = takeHead<ArrayItem>();
-  Expression *arg = readSExpr();
+  SafePtr<ArrayItem> array(takeHead<ArrayItem>());
+  SafePtr<Expression> arg(readSExpr());
   array->bind(arg);
   return array;
 }
@@ -179,11 +179,11 @@ Expression *Parser::readSExprArrayItem()
 Expression *Parser::readSExprSelector()
 {
   consumeSym(Symbol::If);
-  Expression *cond = readExpr();
+  SafePtr<Expression> cond(readExpr());
   consumeSym(Symbol::Then);
-  Expression *positive = readExpr();
+  SafePtr<Expression> positive(readExpr());
   consumeSym(Symbol::Else);
-  Expression *negative = readExpr();
+  SafePtr<Expression> negative(readExpr());
   return new Selector(cond, positive, negative);
 }
 
@@ -191,7 +191,7 @@ Expression *Parser::readSExprSelector()
 Expression *Parser::readSExprSubexpr()
 {
   consumeSym(Symbol::LParen);
-  Expression *inside = readExpr();
+  SafePtr<Expression> inside(readExpr());
   consumeSym(Symbol::RParen);
   return inside;
 }

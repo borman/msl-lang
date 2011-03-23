@@ -42,15 +42,19 @@ int main()
   catch (const Lexer::Exception &e)
   {
     const TextRegion &r = e.region();
-    printf("stdin:%u:%u-%u-%u: Lexer error: %s in \"%s\"\n",
+    printf("stdin:%u:%u-%u:%u: Lexer error: %s in \"%s\"\n",
            r.startRow, r.startCol, r.endRow, r.endCol,
            e.text().c_str(), e.token().c_str());
     return 1;
   }
   catch (const Parser::Exception &e)
   {
-    printf("Parser error: %s\n", e.text().c_str());
+    const TextRegion &r = e.region();
+    printf("stdin:%u:%u-%u:%u: Parser error: %s\n", 
+        r.startRow, r.startCol, r.endRow, r.endCol,
+        e.text().c_str());
     printTokens(e.tokens());
+    deleteChain(e.tokens());
     return 1;
   }
 

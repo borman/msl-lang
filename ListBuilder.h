@@ -8,6 +8,7 @@ class ListBuilder
 {
   public:
     ListBuilder(): m_head(NULL), m_tail(NULL) {} 
+    ~ListBuilder() { deleteChain(m_head); }
 
     void add(T *item)
     {
