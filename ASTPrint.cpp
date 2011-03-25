@@ -3,6 +3,8 @@
 #include "AST.h"
 #include "Symbols.h"
 
+// #define PRINT_REGIONS_IN_AST
+
 using namespace AST;
 
 static const char *infix(Infix::Subtype t)
@@ -26,7 +28,7 @@ static const char *infix(Infix::Subtype t)
 static void indent(FILE *dest, unsigned int n)
 {
   for (unsigned int i=0; i<n; i++)
-    fprintf(dest, " ");
+    fprintf(dest, "  ");
 } 
 
 void AST::printTokens(FILE *dest, Base *tokens)
@@ -82,126 +84,138 @@ void AST::printTokens(FILE *dest, Base *tokens)
   }
 }
 
-void AST::printBlock(FILE *dest, const char *name, Base *ast, unsigned int n_indent)
+void AST::printBlock(FILE *dest, const char *name, Base *ast, 
+    unsigned int n_indent, bool one_line)
 {
-  indent(dest, n_indent);
-  fprintf(dest, "(%s", name);
+  int d = 0;
+  if (name != NULL)
+  {
+    indent(dest, n_indent);
+    fprintf(dest, "(%s", name);
+    d = 1;
+  }
   for (Base *i = ast; i!=NULL; i=i->next<Base>())
   {
-    fprintf(dest, "\n");
-    printTree(dest, i, n_indent+1);
+    if (!(name == NULL && i==ast))
+      fprintf(dest, one_line? " ": "\n");
+    printTree(dest, i, n_indent+d, !one_line);
   }
-  fprintf(dest, ")");
+  if (name != NULL)
+    fprintf(dest, ")");
 }
 
-void AST::printTree(FILE *dest, Base *ast, unsigned int n_indent)
+void AST::printTree(FILE *dest, Base *ast, unsigned int n_indent, bool do_indent)
 {
-  indent(dest, n_indent);
+  if (do_indent)
+    indent(dest, n_indent);
+
   if (ast == NULL)
   {
     fprintf(dest, "<null>");
     return;
   }
 
+#ifdef PRINT_REGIONS_IN_AST
+  char pos[32];
+  const TextRegion &r = ast->region();
+  snprintf(pos, 32, "<%u:%u-%u:%u> ", 
+      r.startRow, r.startCol, r.endRow, r.endCol);
+#else
+  static const char *pos = "";
+#endif
+
   switch (ast->type())
   {
     case Base::Int:
-      fprintf(dest, "%d", ast->as<Int>()->value());
+      fprintf(dest, "%s%d", pos, ast->as<Int>()->value());
       break;
     case Base::Real:
-      fprintf(dest, "%lf", ast->as<Real>()->value());
+      fprintf(dest, "%s%lf", pos, ast->as<Real>()->value());
       break;
     case Base::Bool:
-      fprintf(dest, "%s", ast->as<Bool>()->value()? "true" : "false");
+      fprintf(dest, "%s%s", pos, ast->as<Bool>()->value()? "true" : "false");
       break;
     case Base::Literal:
-      fprintf(dest, "\"%s\"", ast->as<Literal>()->text().c_str());
+      fprintf(dest, "%s\"%s\"", pos, ast->as<Literal>()->text().c_str());
       break;
     case Base::Variable:
-      fprintf(dest, "'%s", ast->as<Variable>()->name().c_str());
+      fprintf(dest, "%s'%s", pos, ast->as<Variable>()->name().c_str());
       break;
 
     case Base::FuncCall:
       {
         FuncCall *func = ast->as<FuncCall>();
-        fprintf(dest, "(call\n");
-        indent(dest, n_indent+1);
-        fprintf(dest, "'%s\n", func->name().c_str());
-        printTree(dest, func->arg(), n_indent+1);
+        fprintf(dest, "(%scall '%s ", pos, func->name().c_str());
+        printTree(dest, func->arg(), n_indent+1, false);
         fprintf(dest, ")");
       } break;
 
     case Base::ArrayItem:
       {
         ArrayItem *array = ast->as<ArrayItem>();
-        fprintf(dest, "(array\n");
-        indent(dest, n_indent+1);
-        fprintf(dest, "'%s\n", array->name().c_str());
-        printTree(dest, array->arg(), n_indent+1);
+        fprintf(dest, "(%sarray '%s ", pos, array->name().c_str());
+        printTree(dest, array->arg(), n_indent+1, false);
         fprintf(dest, ")");
       } break;
 
     case Base::Infix:
       {
         Infix *op = ast->as<Infix>();
-        fprintf(dest, "(%s\n", infix(op->subtype()));
-        printTree(dest, op->left(), n_indent+1);
-        fprintf(dest, "\n");
-        printTree(dest, op->right(), n_indent+1);
+        fprintf(dest, "(%s%s ", pos, infix(op->subtype()));
+        printTree(dest, op->left(), n_indent+1, false);
+        fprintf(dest, " ");
+        printTree(dest, op->right(), n_indent+1, false);
         fprintf(dest, ")");
       } break;
 
     case Base::Tuple:
       {
         Tuple *tuple = ast->as<Tuple>();
-        fprintf(dest, "(tuple");
+        fprintf(dest, "(%s", pos);
         if (tuple->contents() != NULL)
-        {
-          fprintf(dest, "\n");
-          printBlock(dest, "tuple", tuple->contents(), n_indent+1);
-        }
+          printBlock(dest, NULL, tuple->contents(), n_indent+1, true);
         fprintf(dest, ")");
       } break;
 
     case Base::Selector:
       {
         Selector *sel = ast->as<Selector>();
-        fprintf(dest, "(if\n");
-        printTree(dest, sel->condition(), n_indent+1);
-        fprintf(dest, "\n");
-        printTree(dest, sel->positive(), n_indent+1);
-        fprintf(dest, "\n");
-        printTree(dest, sel->negative(), n_indent+1);
+        fprintf(dest, "(%sif ", pos);
+        printTree(dest, sel->condition(), n_indent+1, false);
+        fprintf(dest, " ");
+        printTree(dest, sel->positive(), n_indent+1, false);
+        fprintf(dest, " ");
+        printTree(dest, sel->negative(), n_indent+1, false);
         fprintf(dest, ")");
       } break;
     
     case Base::Do:
-      fprintf(dest, "(do\n");
-      printTree(dest, ast->as<Do>()->expr(), n_indent+1);
+      fprintf(dest, "(%sdo ", pos);
+      printTree(dest, ast->as<Do>()->expr(), n_indent+1, false);
       fprintf(dest, ")");
       break;
 
     case Base::Return:
-      fprintf(dest, "(return\n");
-      printTree(dest, ast->as<Return>()->expr(), n_indent+1);
+      fprintf(dest, "(%sreturn ", pos);
+      printTree(dest, ast->as<Return>()->expr(), n_indent+1, false);
       fprintf(dest, ")");
       break;
 
     case Base::Let:
       {
         Let *let = ast->as<Let>();
-        fprintf(dest, "(let\n");
-        printTree(dest, let->lvalue(), n_indent+1);
-        fprintf(dest, "\n");
-        printTree(dest, let->rvalue(), n_indent+1);
+        fprintf(dest, "(%slet ", pos);
+        printTree(dest, let->lvalue(), n_indent+1, false);
+        fprintf(dest, " ");
+        printTree(dest, let->rvalue(), n_indent+1, false);
         fprintf(dest, ")");
       } break;
 
     case Base::If:
       {
         If *sel = ast->as<If>();
-        fprintf(dest, "(if\n");
-        printTree(dest, sel->condition(), n_indent+1);
+        fprintf(dest, "(%sif ", pos);
+        printTree(dest, sel->condition(), n_indent+1, false);
         fprintf(dest, "\n");
         printBlock(dest, "block", sel->positive(), n_indent+1);
         if (sel->negative() != NULL)
@@ -215,8 +229,8 @@ void AST::printTree(FILE *dest, Base *ast, unsigned int n_indent)
     case Base::While:
       {
         While *sel = ast->as<While>();
-        fprintf(dest, "(if\n");
-        printTree(dest, sel->condition(), n_indent+1);
+        fprintf(dest, "(%swhile ", pos);
+        printTree(dest, sel->condition(), n_indent+1, false);
         fprintf(dest, "\n");
         printBlock(dest, "block", sel->body(), n_indent+1);
         fprintf(dest, ")");
@@ -225,12 +239,12 @@ void AST::printTree(FILE *dest, Base *ast, unsigned int n_indent)
     case Base::For:
       {
         For *sel = ast->as<For>();
-        fprintf(dest, "(for\n");
-        printTree(dest, sel->var(), n_indent+1);
-        fprintf(dest, "\n");
-        printTree(dest, sel->from(), n_indent+1);
-        fprintf(dest, "\n");
-        printTree(dest, sel->to(), n_indent+1);
+        fprintf(dest, "(%sfor ", pos);
+        printTree(dest, sel->var(), n_indent+1, false);
+        fprintf(dest, " ");
+        printTree(dest, sel->from(), n_indent+1, false);
+        fprintf(dest, " ");
+        printTree(dest, sel->to(), n_indent+1, false);
         fprintf(dest, "\n");
         printBlock(dest, "block", sel->body(), n_indent+1);
         fprintf(dest, ")");
@@ -239,8 +253,8 @@ void AST::printTree(FILE *dest, Base *ast, unsigned int n_indent)
     case Base::Fun:
       {
         Fun *fun = ast->as<Fun>();
-        fprintf(dest, "(fun %s\n", fun->name().c_str());
-        printTree(dest, fun->arg(), n_indent+1);
+        fprintf(dest, "(%sfun '%s ", pos, fun->name().c_str());
+        printTree(dest, fun->arg(), n_indent+1, false);
         fprintf(dest, "\n");
         printBlock(dest, "block", fun->body(), n_indent+1);
         fprintf(dest, ")");

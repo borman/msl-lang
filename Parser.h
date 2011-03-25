@@ -11,18 +11,16 @@ class Parser
     class Exception
     {
       public:
-        Exception(const char *text, AST::Base *tokens, 
-                  const TextRegion &region = TextRegion())
-          : m_text(text), m_tokens(tokens), m_region(region) {}
+        Exception(const char *text, const TextRegion &region = TextRegion())
+          : m_text(text), m_region(region) {}
         const char *text() const { return m_text; }
-        AST::Base *tokens() const { return m_tokens; }
         TextRegion region() const { return m_region; }
       private:
         const char *m_text;
-        AST::Base *m_tokens;
         TextRegion m_region;
     };
 
+    ~Parser() { AST::deleteChain(m_tokens); }
     void feed(AST::Base *tokens);
     AST::Fun *peek();
 

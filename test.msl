@@ -1,13 +1,26 @@
 fun not X
-  if X then
-    return false
-  end else
-    return true
-  end
+  return if X then false else true
 end
 
 fun sqr X
   return X*X
+end
+
+fun qsort [A, L, R]
+  I = L
+  J = R
+  X = $A ((L+R)/2)
+  while not (I>J)
+    while ($A I < X) I = I+1 end
+    while ($A J > X) J = J-1 end
+    if not (I > J) then
+      [$A I, $A J] = [$A J, $A I]
+      I = I+1
+      J = J-1
+    end
+  end
+  if J>L then do qsort [A, L, J] end
+  if I<R then do qsort [A, I, R] end
 end
 
 fun on_start []

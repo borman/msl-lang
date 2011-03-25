@@ -163,7 +163,7 @@ Expression *Parser::readSExpr()
   else if (nextIsSym(Symbol::LBracket))
     return readSExprTuple();
   else 
-    throw Exception("Expression expected", m_tokens, m_tokens->region());
+    throw Exception("Expression expected", m_tokens->region());
 }
 
 // FUNCTION CALL
@@ -300,7 +300,7 @@ bool Parser::nextIsSym(Symbol::Subtype t)
 void Parser::consumeSym(Symbol::Subtype t)
 {
   if (!nextIsSym(t))
-    throw Exception("Symbol expectation failed", m_tokens);
+    throw Exception("Symbol expectation failed", m_tokens->region());
   else
     popHead();
 }
@@ -314,7 +314,7 @@ bool Parser::nextIs(Base::Type t)
 void Parser::expect(Base::Type t)
 {
   if (!nextIs(t))
-    throw Exception("Class expectation failed", m_tokens);
+    throw Exception("Class expectation failed", m_tokens->region());
 }
 
 void Parser::expectLValue(Expression *expr)
@@ -331,7 +331,7 @@ void Parser::expectLValue(Expression *expr)
     }
   }
   else
-    throw Exception("LValue expected", m_tokens);
+    throw Exception("LValue expected", expr->region());
 }
 
 void Parser::expectEqualSign()
@@ -339,6 +339,6 @@ void Parser::expectEqualSign()
   if (nextIs(Base::Infix) && head<Infix>()->subtype() == Infix::Equals)
     popHead();
   else
-    throw Exception("Assignment operator expected", m_tokens);
+    throw Exception("Assignment operator expected", m_tokens->region());
 }
 

@@ -76,17 +76,15 @@ int main()
   {
     const TextRegion &r = e.region();
     printf("stdin:%u:%u-%u:%u: Lexer error: %s in \"%s\"\n",
-           r.startRow, r.startCol, r.endRow, r.endCol,
+           r.startRow+1, r.startCol+1, r.endRow+1, r.endCol+1,
            e.text(), e.token().c_str());
   }
   catch (const Parser::Exception &e)
   {
     const TextRegion &r = e.region();
     printf("stdin:%u:%u-%u:%u: Parser error: %s\n", 
-        r.startRow, r.startCol, r.endRow, r.endCol,
+        r.startRow+1, r.startCol+1, r.endRow+1, r.endCol+1,
         e.text());
-    printTokens(stderr, e.tokens());
-    deleteChain(e.tokens());
   }
 
   if (tokensFile != stderr)

@@ -188,7 +188,7 @@ void Compiler::compilePushFuncCall(FuncCall *expr)
 void Compiler::compilePushArrayItem(ArrayItem *expr)
 {
   compilePushExpr(expr->arg());
-  fprintf(m_out, "pusharritem\t\t%s\n", expr->name().c_str());
+  fprintf(m_out, "pusharritem\t%s\n", expr->name().c_str());
 }
 
 void Compiler::compilePushTuple(Tuple *expr)
