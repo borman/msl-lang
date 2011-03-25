@@ -1,8 +1,10 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#include <string>
 #include "AST.h"
 #include "ListBuilder.h"
+#include "LexemGenerator.h"
 
 class Lexer
 {
@@ -10,32 +12,56 @@ class Lexer
     class Exception
     {
       public:
-        Exception(const char *text, const std::string &token, 
-                  const TextRegion &region) 
-          : m_text(text), m_token(token), m_region(region) {}
+        Exception(unsigned int row, unsigned int col, 
+            const char *text = NULL)
+          : m_row(row), m_col(col), m_text(text) {}
 
+        unsigned int row() const { return m_row; }
+        unsigned int col() const { return m_col; }
         const char *text() const { return m_text; }
-        std::string token() const { return m_token; }
-        TextRegion region() const { return m_region; }
-
       private:
+        unsigned int m_row;
+        unsigned int m_col;
         const char *m_text;
-        std::string m_token;
-        TextRegion m_region;
     };
 
     Lexer(StringTable *table)
-      : m_stringtable(table) {}
-    ~Lexer();
-
-    void feed(AST::Token *tokens);
-    AST::Base *peek() { return m_ready.takeAll(); }
-
+      : m_state(S_Whitespace), m_is_literal(false), 
+        m_row(0), m_col(0), m_lexgen(table) {}
+    
+    void feed(char c); 
+    AST::Base *peek() { return m_tokens.takeAll(); }
   private:
-    AST::Base *consume(AST::Token *token);
+    enum State
+    {
+      S_Whitespace,
+      S_Quoted,
+      S_QuotedEsc,
+      S_Token,
+      S_Comment
+    };
 
-    StringTable *m_stringtable;
-    ListBuilder<AST::Base> m_ready;
+    State stateWhitespace(char c);
+    State stateQuoted(char c);
+    State stateQuotedEsc(char c);
+    State stateToken(char c);
+    State stateComment(char c);
+
+    void putChar(char c);
+    void beginToken(int row, int col);
+    void endToken(int row, int col);
+    void setLiteral();
+  
+    State m_state;
+    bool m_is_literal;
+    std::string m_current_token;
+    ListBuilder<AST::Base> m_tokens;
+    TextRegion m_region;
+    unsigned int m_row;
+    unsigned int m_col;
+
+    LexemGenerator m_lexgen;
 };
 
 #endif // LEXER_H
+

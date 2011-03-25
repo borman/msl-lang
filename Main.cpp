@@ -1,5 +1,4 @@
 #include <cstdio>
-#include "Tokenizer.h"
 #include "Lexer.h"
 #include "Parser.h"
 #include "Compiler.h"
@@ -45,16 +44,14 @@ int main()
   try
   {
     StringTable strings;
-    Tokenizer tokenizer;
     Lexer lexer(&strings);
     Parser parser;
     Compiler compiler(asmFile);
 
     int c;
     while ((c = getchar()) != EOF)
-      tokenizer.feed(c);
-    tokenizer.feed('\n');
-    lexer.feed(tokenizer.peek());
+      lexer.feed(c);
+    lexer.feed('\n');
     Base *tokens = lexer.peek();
 
     printTokens(tokensFile, tokens);
@@ -71,11 +68,11 @@ int main()
 
     deleteChain(funs);
   }
-  catch (const Tokenizer::Exception &e)
+  catch (const Lexer::Exception &e)
   {
     printf("stdin:%u:%u: Tokenizer error: %s\n", e.row()+1, e.col()+1, e.text());
   }
-  catch (const Lexer::Exception &e)
+  catch (const LexemGenerator::Exception &e)
   {
     const TextRegion &r = e.region();
     printf("stdin:%u:%u-%u:%u: Lexer error: %s in \"%s\"\n",

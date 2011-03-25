@@ -39,13 +39,6 @@ void AST::printTokens(FILE *dest, Base *tokens)
            r.endRow, r.endCol);
     switch (t->type())
     {
-      case Base::Token:
-        if (t->as<Token>()->isLiteral())
-        fprintf(dest, "TOK%c %s", 
-            t->as<Token>()->isLiteral()? 'L':' ',
-            t->as<Token>()->text().c_str());
-        break;
-
       case Base::Symbol:
         fprintf(dest, "SYM  %s", Symbols::name(t->as<Symbol>()->subtype()));
         break;

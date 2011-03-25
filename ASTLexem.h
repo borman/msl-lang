@@ -5,23 +5,6 @@
 
 namespace AST
 {
-  // ===== A general token, neither checked, nor recognized
-  class Token: public Base
-  {
-    public:
-      static const Base::Type m_class_type = Base::Token;
-
-      Token(const std::string &t, bool l, const TextRegion &r)
-        : Base(m_class_type, r), 
-          m_is_literal(l), m_text(t) {} 
-
-      std::string text() const { return m_text; }
-      bool isLiteral() const { return m_is_literal; }
-    private:
-      bool m_is_literal;
-      std::string m_text;
-  };
-
   // ===== Intermediate lexem: will be replaced by parser
   class Symbol: public Base
   {
