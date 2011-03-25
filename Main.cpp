@@ -65,6 +65,7 @@ int main()
 
     compiler.feed(funs);
     printf("Program compiled ok\n");
+    printCode(stdout, compiler.program(), &strings);
 
     deleteChain(funs);
   }

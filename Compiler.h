@@ -2,6 +2,7 @@
 #define COMPILER_H
 
 #include "AST.h"
+#include "Program.h"
 
 class Compiler
 {
@@ -9,6 +10,7 @@ class Compiler
     Compiler(FILE *out): m_counter(0), m_out(out) {}
 
     void feed(AST::Fun *funs);
+    Program &program() { return m_prog; }
   private:
     void compileFun(AST::Fun *fun);
 
@@ -42,7 +44,10 @@ class Compiler
     void compilePopArrayItem(AST::ArrayItem *expr);
     void compilePopTuple(AST::Tuple *expr);
 
+    size_t emit(const Instruction &instr) { return m_prog.write(instr); }
+
     unsigned int m_counter;
+    Program m_prog; 
     FILE *m_out;
 };
 

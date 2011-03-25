@@ -264,3 +264,57 @@ void AST::printTree(FILE *dest, Base *ast, unsigned int n_indent, bool do_indent
       break;
   }
 }
+
+// ========= Linear code =========
+
+static void printInstr(FILE *dest, size_t addr, const Instruction &instr, StringTable *strings)
+{
+  switch (instr.opcode)
+  {
+#define INSTR(opcode) case Instruction::opcode: \
+    printf("%04d: %-20s\n", addr, #opcode); break
+
+#define INSTR_G(opcode, fmt, val) case Instruction::opcode: \
+    printf("%04d: %-20s"fmt"\n", addr, #opcode, val); break
+
+#define INSTR_A(opcode) case Instruction::opcode: \
+    printf("%04d: %-20s%s\n", addr, #opcode, strings->str(instr.arg.atom)); break
+
+    INSTR_A(PushVar);
+    INSTR_G(PushInt, "%d", instr.arg.intval);
+    INSTR_G(PushReal, "%lf", instr.arg.realval);
+    INSTR_G(PushBool, "%s", (instr.arg.boolval?"TRUE":"FALSE"));
+    INSTR_A(PushLiteral);
+    INSTR_A(PushArrayItem);
+    INSTR_A(PopVar);
+    INSTR_A(PopArrayItem);
+    INSTR(PopDelete);
+    INSTR(TupOpen);
+    INSTR(TupClose);
+    INSTR(TupUnOpen);
+    INSTR(TupUnClose);
+    INSTR(Add);
+    INSTR(Sub);
+    INSTR(Mul);
+    INSTR(Div);
+    INSTR(Mod);
+    INSTR(And);
+    INSTR(Or);
+    INSTR(TestLess);
+    INSTR(TestGreater);
+    INSTR(TestEqual);
+    INSTR_G(Jump, "@%04u", instr.arg.addr);
+    INSTR_G(JumpIfNot, "@%04u", instr.arg.addr);
+    INSTR_A(Call);
+    INSTR(Return);
+#undef INSTR
+#undef INSTR_G
+#undef INSTR_A
+  }
+}
+
+void AST::printCode(FILE *dest, const Program &prog, StringTable *strings)
+{
+  for (size_t i=0; i<prog.size(); i++)
+    printInstr(dest, i, prog[i], strings);
+}
