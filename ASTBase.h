@@ -31,6 +31,7 @@ namespace AST
    * | 
    * |- Operator
    * |  |- Do
+   * |  |- Return
    * |  |- Let
    * |  |- If
    * |  |- While
@@ -50,8 +51,8 @@ namespace AST
         Literal, Real, Int, Bool,
         // Complex expression items
         Variable, FuncCall, ArrayItem, Tuple, Selector, Infix,
-        // Higher-level items
-        Let, Do, If, While, For,
+        // Operators
+        Let, Do, Return, If, While, For,
         // Top-level item
         Fun
       };

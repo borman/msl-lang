@@ -37,6 +37,9 @@ void Compiler::compileOperator(Operator *op)
     case Base::Do: 
       compileDo(op->as<Do>()); 
       break;
+    case Base::Return: 
+      compileReturn(op->as<Return>()); 
+      break;
     case Base::Let: 
       compileLet(op->as<Let>()); 
       break;
@@ -62,6 +65,13 @@ void Compiler::compileDo(Do *ast)
   fprintf(m_out, "popdelete\n");
 }
 
+void Compiler::compileReturn(Return *ast)
+{
+  fprintf(m_out, "; RETURN\n");
+  compilePushExpr(ast->expr());
+  fprintf(m_out, "ret\n");
+}
+
 void Compiler::compileLet(Let *ast)
 {
   fprintf(m_out, "; LET\n");
@@ -82,7 +92,7 @@ void Compiler::compileIf(If *ast)
   fprintf(m_out, "@else_%u:\n", n);
   if (ast->negative() != NULL)
   {
-    compileBlock(ast->positive());
+    compileBlock(ast->negative());
     fprintf(m_out, "@if-exit_%u:\n", n);
   }
 }

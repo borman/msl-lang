@@ -9,13 +9,6 @@ using namespace AST;
 
 Lexer::~Lexer()
 {
-  Base *tokens = m_ready.takeAll();
-  while (tokens != NULL)
-  {
-    Base *next = tokens->next<Base>();
-    delete tokens;
-    tokens = next;
-  }
 }
 
 void Lexer::feed(Token *tokens)
@@ -33,13 +26,7 @@ void Lexer::feed(Token *tokens)
   catch (const Lexer::Exception &)
   {
     // Delete leftover
-    while (tokens != NULL)
-    {
-      Token *next = tokens->next<Token>();
-      delete tokens;
-      tokens = next;
-    }
-
+    deleteChain(tokens);
     throw;
   }
 }
@@ -121,7 +108,7 @@ Base *Lexer::consume(Token *token)
 
   // Literal
   if (token->isLiteral())
-    return new Literal(token->text(), token->region());
+    return new Literal(Atom(str.c_str(), m_stringtable), token->region());
 
   // Symbol
   Symbols::Ref sym = Symbols::find(str);
@@ -137,14 +124,14 @@ Base *Lexer::consume(Token *token)
   if (str == "true")
     return new Bool(true, token->region());
   if (str == "false")
-    return new Bool(true, token->region());
+    return new Bool(false, token->region());
 
   // Function name
   if (islower(str[0]))
   {
     if (!validateIdentifier(str))
       throw Exception("Invalid function name", str, token->region());
-    return new FuncCall(str, NULL, token->region());
+    return new FuncCall(Atom(str.c_str(), m_stringtable), NULL, token->region());
   }
 
   // Variable name
@@ -152,7 +139,7 @@ Base *Lexer::consume(Token *token)
   {
     if (!validateIdentifier(str))
       throw Exception("Invalid variable name", str, token->region());
-    return new Variable(str, token->region());
+    return new Variable(Atom(str.c_str(), m_stringtable), token->region());
   }
 
   // Array name
@@ -161,7 +148,7 @@ Base *Lexer::consume(Token *token)
     string name = str.substr(1); // Remove leading $
     if (!validateIdentifier(name))
       throw Exception("Invalid array name", str, token->region());
-    return new ArrayItem(name, NULL, token->region());
+    return new ArrayItem(Atom(name.c_str(), m_stringtable), NULL, token->region());
   }
 
   // Real

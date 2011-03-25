@@ -10,20 +10,22 @@ class Lexer
     class Exception
     {
       public:
-        Exception(const std::string &text, const std::string &token, 
+        Exception(const char *text, const std::string &token, 
                   const TextRegion &region) 
           : m_text(text), m_token(token), m_region(region) {}
 
-        std::string text() const { return m_text; }
+        const char *text() const { return m_text; }
         std::string token() const { return m_token; }
         TextRegion region() const { return m_region; }
 
       private:
-        std::string m_text;
+        const char *m_text;
         std::string m_token;
         TextRegion m_region;
     };
 
+    Lexer(StringTable *table)
+      : m_stringtable(table) {}
     ~Lexer();
 
     void feed(AST::Token *tokens);
@@ -32,6 +34,7 @@ class Lexer
   private:
     AST::Base *consume(AST::Token *token);
 
+    StringTable *m_stringtable;
     ListBuilder<AST::Base> m_ready;
 };
 

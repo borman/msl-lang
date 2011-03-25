@@ -57,6 +57,10 @@ static void deleteSubtree(Base *root)
       deleteChain(root->as<Do>()->expr());
       break;
 
+    case Base::Return:
+      deleteChain(root->as<Return>()->expr());
+      break;
+
     case Base::Let:
       deleteChain(root->as<Let>()->lvalue());
       deleteChain(root->as<Let>()->rvalue());

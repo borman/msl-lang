@@ -17,6 +17,7 @@ class Compiler
     
     // Operators
     void compileDo(AST::Do *ast);
+    void compileReturn(AST::Return *ast);
     void compileLet(AST::Let *ast);
     void compileIf(AST::If *ast);
     void compileWhile(AST::While *ast);

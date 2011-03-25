@@ -43,6 +43,20 @@ namespace AST
       Expression *m_expr;
   };
 
+  class Return: public Operator
+  {
+    public:
+      static const Base::Type m_class_type = Base::Return;
+
+      Return(Expression *expr, const TextRegion &r = TextRegion())
+        : Operator(m_class_type, r),
+          m_expr(expr) {} 
+
+      Expression *expr() const { return m_expr; }
+    private:
+      Expression *m_expr;
+  };
+
   class If: public Operator
   {
     public:
@@ -105,15 +119,15 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Fun;
 
-      Fun(const std::string &name, Expression *arg, Operator *body, const TextRegion &r = TextRegion())
+      Fun(const Atom &name, Expression *arg, Operator *body, const TextRegion &r = TextRegion())
         : Base(m_class_type, r),
           m_name(name), m_arg(arg), m_body(body) {} 
 
-      std::string name() const { return m_name; }
+      Atom name() const { return m_name; }
       Expression *arg() const { return m_arg; }
       Operator *body() const { return m_body; }
     private:
-      std::string m_name;
+      Atom m_name;
       Expression *m_arg;
       Operator *m_body;
   };

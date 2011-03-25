@@ -44,8 +44,9 @@ int main()
   
   try
   {
+    StringTable strings;
     Tokenizer tokenizer;
-    Lexer lexer;
+    Lexer lexer(&strings);
     Parser parser;
     Compiler compiler(asmFile);
 
@@ -72,21 +73,21 @@ int main()
   }
   catch (const Tokenizer::Exception &e)
   {
-    printf("stdin:%u:%u: Tokenizer error: %s\n", e.row()+1, e.col()+1, e.text().c_str());
+    printf("stdin:%u:%u: Tokenizer error: %s\n", e.row()+1, e.col()+1, e.text());
   }
   catch (const Lexer::Exception &e)
   {
     const TextRegion &r = e.region();
     printf("stdin:%u:%u-%u:%u: Lexer error: %s in \"%s\"\n",
            r.startRow, r.startCol, r.endRow, r.endCol,
-           e.text().c_str(), e.token().c_str());
+           e.text(), e.token().c_str());
   }
   catch (const Parser::Exception &e)
   {
     const TextRegion &r = e.region();
     printf("stdin:%u:%u-%u:%u: Parser error: %s\n", 
         r.startRow, r.startCol, r.endRow, r.endCol,
-        e.text().c_str());
+        e.text());
     printTokens(stderr, e.tokens());
     deleteChain(e.tokens());
   }

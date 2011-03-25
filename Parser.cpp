@@ -3,7 +3,6 @@
 
 using namespace AST;
 
-// FIXME: Memory leak on exception
 // TODO: Track text regions
 
 void Parser::feed(Base *tokens)
@@ -26,7 +25,7 @@ Fun *Parser::readFun()
   consumeSym(Symbol::Fun);
   
   expect(Base::FuncCall);
-  const std::string name = head<FuncCall>()->name();
+  const Atom name = head<FuncCall>()->name();
   popHead();
 
   SafePtr<Expression> arg(readSExpr());
@@ -52,6 +51,8 @@ Operator *Parser::readOperator()
 {
   if (nextIsSym(Symbol::Do))
     return readOperatorDo();
+  else if (nextIsSym(Symbol::Return))
+    return readOperatorReturn();
   else if (nextIsSym(Symbol::If))
     return readOperatorIf();
   else if (nextIsSym(Symbol::For))
@@ -68,6 +69,14 @@ Operator *Parser::readOperatorDo()
   consumeSym(Symbol::Do);
   SafePtr<Expression> expr(readExpr());
   return new Do(expr);
+}
+
+// RETURN
+Operator *Parser::readOperatorReturn()
+{
+  consumeSym(Symbol::Return);
+  SafePtr<Expression> expr(readExpr());
+  return new Return(expr);
 }
 
 // IF

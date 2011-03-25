@@ -11,14 +11,14 @@ class Parser
     class Exception
     {
       public:
-        Exception(const std::string &text, AST::Base *tokens, 
+        Exception(const char *text, AST::Base *tokens, 
                   const TextRegion &region = TextRegion())
           : m_text(text), m_tokens(tokens), m_region(region) {}
-        std::string text() const { return m_text; }
+        const char *text() const { return m_text; }
         AST::Base *tokens() const { return m_tokens; }
         TextRegion region() const { return m_region; }
       private:
-        std::string m_text;
+        const char *m_text;
         AST::Base *m_tokens;
         TextRegion m_region;
     };
@@ -31,6 +31,7 @@ class Parser
     AST::Operator *readBlock();
     AST::Operator *readOperator();
     AST::Operator *readOperatorDo();
+    AST::Operator *readOperatorReturn();
     AST::Operator *readOperatorIf();
     AST::Operator *readOperatorFor();
     AST::Operator *readOperatorWhile();
@@ -66,7 +67,6 @@ class Parser
     }
 
     void popHead() { delete takeHead<AST::Base>(); }
-
 
     AST::Base *m_tokens;
     ListBuilder<AST::Base> m_token_queue;

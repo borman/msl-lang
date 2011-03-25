@@ -1,3 +1,15 @@
+fun not X
+  if X then
+    return false
+  end else
+    return true
+  end
+end
+
+fun sqr X
+  return X*X
+end
+
 fun on_start []
   do print ["Игра начинается, игроков: ", NPlayers]
 end

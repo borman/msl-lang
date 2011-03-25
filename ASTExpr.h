@@ -2,6 +2,7 @@
 #define ASTEXPR_H
 
 #include "ASTBase.h"
+#include "Atom.h"
 
 namespace AST
 {
@@ -20,13 +21,13 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Literal;
 
-      Literal(const std::string &s, const TextRegion &r)
+      Literal(const Atom &s, const TextRegion &r)
         : Expression(m_class_type, r), 
           m_text(s) {} 
 
-      std::string text() const { return m_text; }
+      Atom text() const { return m_text; }
     private:
-      std::string m_text;
+      Atom m_text;
   };
 
   class Int: public Expression
@@ -78,13 +79,13 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Variable;
 
-      Variable(const std::string &name, const TextRegion &r)
+      Variable(const Atom &name, const TextRegion &r)
         : Expression(m_class_type, r), 
           m_name(name) {} 
 
-      std::string name() const { return m_name; }
+      Atom name() const { return m_name; }
     private:
-      std::string m_name;
+      Atom m_name;
   };
 
   class FuncCall: public Expression
@@ -92,16 +93,16 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::FuncCall;
 
-      FuncCall(const std::string &name, Expression *arg, const TextRegion &r)
+      FuncCall(const Atom &name, Expression *arg, const TextRegion &r)
         : Expression(m_class_type, r), 
           m_name(name), m_arg(arg) {} 
 
-      std::string name() const { return m_name; }
+      Atom name() const { return m_name; }
       Expression *arg() const { return m_arg; }
 
       void bind(Expression *arg) { m_arg=arg; }
     private:
-      std::string m_name;
+      Atom m_name;
       Expression *m_arg;
   };
 
@@ -110,16 +111,16 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::ArrayItem;
 
-      ArrayItem(const std::string &name, Expression *arg, const TextRegion &r)
+      ArrayItem(const Atom &name, Expression *arg, const TextRegion &r)
         : Expression(m_class_type, r),
           m_name(name), m_arg(arg) {} 
 
-      std::string name() const { return m_name; }
+      Atom name() const { return m_name; }
       Expression *arg() const { return m_arg; }
 
       void bind(Expression *arg) { m_arg=arg; }
     private:
-      std::string m_name;
+      Atom m_name;
       Expression *m_arg;
   };
 

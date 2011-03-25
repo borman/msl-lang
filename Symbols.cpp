@@ -7,6 +7,7 @@ const Symbols::Definition Symbols::symbolTbl[] =
   {"fun",   Symbol::Fun     },
   {"end",   Symbol::End     },
   {"do",    Symbol::Do      },
+  {"return",Symbol::Return  },
   {"for",   Symbol::For     },
   {"from",  Symbol::From    },
   {"to",    Symbol::To      },

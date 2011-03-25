@@ -32,7 +32,7 @@ namespace AST
       {
         // Keywords
         Fun, End,
-        Do,
+        Do, Return,
         For, From, To,
         While,
         If, Then, Else,

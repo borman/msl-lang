@@ -188,6 +188,12 @@ void AST::printTree(FILE *dest, Base *ast, unsigned int n_indent)
       fprintf(dest, ")");
       break;
 
+    case Base::Return:
+      fprintf(dest, "(return\n");
+      printTree(dest, ast->as<Return>()->expr(), n_indent+1);
+      fprintf(dest, ")");
+      break;
+
     case Base::Let:
       {
         Let *let = ast->as<Let>();

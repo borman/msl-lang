@@ -11,17 +11,17 @@ class Tokenizer
     class Exception
     {
       public:
-        Exception(unsigned int r, unsigned int c, 
-            const std::string &t = std::string())
-          : m_row(r), m_col(c), m_text(t) {}
+        Exception(unsigned int row, unsigned int col, 
+            const char *text = NULL)
+          : m_row(row), m_col(col), m_text(text) {}
 
         unsigned int row() const { return m_row; }
         unsigned int col() const { return m_col; }
-        std::string text() const { return m_text; }
+        const char *text() const { return m_text; }
       private:
         unsigned int m_row;
         unsigned int m_col;
-        std::string m_text;
+        const char *m_text;
     };
 
     Tokenizer()
