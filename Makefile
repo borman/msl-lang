@@ -12,7 +12,7 @@ CXX = g++
 CXXFLAGS = -pipe -pedantic -Wall -Wextra -O2 -fopenmp -g
 else
 CXX = g++
-CXXFLAGS = -pipe -pedantic -Wall -Wextra -g2
+CXXFLAGS = -pipe -Wall -Wextra -g2
 endif
 
 LDFLAGS = -lm -Wl,--as-needed

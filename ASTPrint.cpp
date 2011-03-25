@@ -272,13 +272,13 @@ static void printInstr(FILE *dest, size_t addr, const Instruction &instr, String
   switch (instr.opcode)
   {
 #define INSTR(opcode) case Instruction::opcode: \
-    printf("%04d: %-20s\n", addr, #opcode); break
+    fprintf(dest, "%04zu: %-20s\n", addr, #opcode); break
 
 #define INSTR_G(opcode, fmt, val) case Instruction::opcode: \
-    printf("%04d: %-20s"fmt"\n", addr, #opcode, val); break
+    fprintf(dest, "%04zu: %-20s"fmt"\n", addr, #opcode, val); break
 
 #define INSTR_A(opcode) case Instruction::opcode: \
-    printf("%04d: %-20s%s\n", addr, #opcode, strings->str(instr.arg.atom)); break
+    fprintf(dest, "%04zu: %-20s%s\n", addr, #opcode, strings->str(instr.arg.atom)); break
 
     INSTR_A(PushVar);
     INSTR_G(PushInt, "%d", instr.arg.intval);
@@ -303,10 +303,11 @@ static void printInstr(FILE *dest, size_t addr, const Instruction &instr, String
     INSTR(TestLess);
     INSTR(TestGreater);
     INSTR(TestEqual);
-    INSTR_G(Jump, "@%04u", instr.arg.addr);
-    INSTR_G(JumpIfNot, "@%04u", instr.arg.addr);
+    INSTR_G(Jump, "@%04zu", instr.arg.addr);
+    INSTR_G(JumpIfNot, "@%04zu", instr.arg.addr);
     INSTR_A(Call);
     INSTR(Return);
+    INSTR(Trap);
 #undef INSTR
 #undef INSTR_G
 #undef INSTR_A

@@ -46,7 +46,7 @@ int main()
     StringTable strings;
     Lexer lexer(&strings);
     Parser parser;
-    Compiler compiler(asmFile);
+    Compiler compiler;
 
     int c;
     while ((c = getchar()) != EOF)
@@ -65,7 +65,7 @@ int main()
 
     compiler.feed(funs);
     printf("Program compiled ok\n");
-    printCode(stdout, compiler.program(), &strings);
+    printCode(asmFile, compiler.program(), &strings);
 
     deleteChain(funs);
   }

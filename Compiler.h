@@ -7,8 +7,6 @@
 class Compiler
 {
   public:
-    Compiler(FILE *out): m_counter(0), m_out(out) {}
-
     void feed(AST::Fun *funs);
     Program &program() { return m_prog; }
   private:
@@ -44,11 +42,12 @@ class Compiler
     void compilePopArrayItem(AST::ArrayItem *expr);
     void compilePopTuple(AST::Tuple *expr);
 
-    size_t emit(const Instruction &instr) { return m_prog.write(instr); }
+    
+    template<class T> 
+    size_t emit(Instruction::Opcode opcode, T arg) { return m_prog.write(Instruction(opcode, arg)); }
+    size_t emit(Instruction::Opcode opcode) { return m_prog.write(Instruction(opcode)); }
 
-    unsigned int m_counter;
     Program m_prog; 
-    FILE *m_out;
 };
 
 #endif // COMPILER_H

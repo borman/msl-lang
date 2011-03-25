@@ -18,7 +18,9 @@ struct Instruction
     // Tests
     TestLess, TestGreater, TestEqual,
     // Jumps
-    Jump, JumpIfNot, Call, Return
+    Jump, JumpIfNot, Call, Return,
+    // Special
+    Trap
   };
   union Arg
   {
