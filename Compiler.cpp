@@ -15,10 +15,16 @@ void Compiler::feed(Fun *funs)
 
 void Compiler::compileFun(Fun *fun)
 {
+  // Define an entry point
+  m_prog.addEntry(Program::EntryPoint(fun->name(), m_prog.nextAddr()));
+
+  // Load & bind argument
   compilePopExpr(fun->arg());
+
   compileBlock(fun->body());
 
   // "noreturn" exit
+  // TODO: Do not generate if return guaranteed 
   emit(Instruction::TupOpen);
   emit(Instruction::TupClose);
   emit(Instruction::Return);
@@ -45,7 +51,6 @@ void Compiler::compileOperator(Operator *op)
     OP(While);
     OP(For);
 #undef OP
-
     default:
       break;
   }
@@ -54,6 +59,7 @@ void Compiler::compileOperator(Operator *op)
 void Compiler::compileDo(Do *ast)
 {
   compilePushExpr(ast->expr());
+  // Discard expression result
   emit(Instruction::PopDelete);
 }
 
@@ -108,6 +114,7 @@ void Compiler::compileWhile(While *ast)
 void Compiler::compileFor(For *ast)
 {
   // Not to be implemented: should be converted to 'while' at AST analysis
+  emit(Instruction::Trap);
 }
 
 void Compiler::compilePushExpr(Expression *expr)
@@ -131,6 +138,8 @@ void Compiler::compilePushExpr(Expression *expr)
     break;
   }
 }
+
+// ============ Trivial typed constants
 
 void Compiler::compilePushInt(Int *expr)
 {
@@ -157,6 +166,8 @@ void Compiler::compilePushVariable(Variable *expr)
   emit(Instruction::PushVar, expr->name());
 }
 
+// ============
+
 void Compiler::compilePushFuncCall(FuncCall *expr)
 {
   compilePushExpr(expr->arg());
@@ -178,20 +189,26 @@ void Compiler::compilePushTuple(Tuple *expr)
     compilePushExpr(contents);
     contents = contents->next<Expression>();
   }
-  emit(Instruction::TupOpen);
+  emit(Instruction::TupClose);
 }
 
 void Compiler::compilePushSelector(Selector *expr)
 {
   compilePushExpr(expr->condition());
+
   // JNOT @ELSE
   size_t j_else = emit(Instruction::JumpIfNot);
+
+  // then ...
   compilePushExpr(expr->positive());
   // JUMP @EXIT
   size_t j_exit = emit(Instruction::Jump);
+
   // @ELSE:
   m_prog[j_else].arg.addr = m_prog.nextAddr();
+  // else ...
   compilePushExpr(expr->negative());
+
   // @EXIT:
   m_prog[j_exit].arg.addr = m_prog.nextAddr();
 }

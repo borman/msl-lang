@@ -316,6 +316,13 @@ static void printInstr(FILE *dest, size_t addr, const Instruction &instr, String
 
 void AST::printCode(FILE *dest, const Program &prog, StringTable *strings)
 {
+  fprintf(dest, "Entries:\n");
+  for (size_t i=0; i<prog.entryCount(); i++)
+  {
+    const Program::EntryPoint &e = prog.entry(i);
+    fprintf(dest, "@%04zu  %s\n", e.addr, e.name.c_str());
+  }
+  fprintf(dest, "Code:\n");
   for (size_t i=0; i<prog.size(); i++)
     printInstr(dest, i, prog[i], strings);
 }
