@@ -8,7 +8,7 @@ struct Instruction
   enum Opcode
   {
     // Push to stack
-    PushVar, PushInt, PushReal, PushBool, PushLiteral, PushArrayItem,
+    PushVar, PushInt, PushReal, PushBool, PushString, PushArrayItem,
     // Pop from stack
     PopVar, PopArrayItem, PopDelete,
     // Tuple boundaries

@@ -1,0 +1,17 @@
+fun sqr X
+  return X*X
+end
+
+fun gcd [A, B]
+  if B > A then
+    [A, B] = [B, A]
+  end
+  while B > 0
+    [A, B] = [B, A%B]
+  end
+  return A
+end
+
+fun main []
+  Q = gcd [7000, 7*9*1543]
+end

@@ -284,7 +284,7 @@ static void printInstr(FILE *dest, size_t addr, const Instruction &instr, String
     INSTR_G(PushInt, "%d", instr.arg.intval);
     INSTR_G(PushReal, "%lf", instr.arg.realval);
     INSTR_G(PushBool, "%s", (instr.arg.boolval?"TRUE":"FALSE"));
-    INSTR_A(PushLiteral);
+    INSTR_A(PushString);
     INSTR_A(PushArrayItem);
     INSTR_A(PopVar);
     INSTR_A(PopArrayItem);
@@ -320,7 +320,7 @@ void AST::printCode(FILE *dest, const Program &prog, StringTable *strings)
   for (size_t i=0; i<prog.entryCount(); i++)
   {
     const Program::EntryPoint &e = prog.entry(i);
-    fprintf(dest, "@%04zu  %s\n", e.addr, e.name.c_str());
+    fprintf(dest, "%04zu: %s\n", e.addr, e.name.c_str());
   }
   fprintf(dest, "Code:\n");
   for (size_t i=0; i<prog.size(); i++)

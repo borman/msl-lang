@@ -4,7 +4,7 @@
 
 using namespace AST;
 
-void Compiler::feed(Fun *funs)
+void Compiler::compile(Fun *funs)
 {
   while (funs != NULL)
   {
@@ -158,7 +158,7 @@ void Compiler::compilePushBool(Bool *expr)
 
 void Compiler::compilePushLiteral(Literal *expr)
 {
-  emit(Instruction::PushLiteral, expr->text());
+  emit(Instruction::PushString, expr->text());
 }
 
 void Compiler::compilePushVariable(Variable *expr)

@@ -2,6 +2,7 @@
 #include "Lexer.h"
 #include "Parser.h"
 #include "Compiler.h"
+#include "Executor.h"
 #include "Symbols.h"
 #include "AST.h"
 #include "ASTPrint.h"
@@ -40,13 +41,17 @@ int main()
   }
   else
     printf("Saving ASM to \"%s\"\n", asmFileName);
+
+  // ======
+
+  Program program;
+  StringTable strings;
   
   try
   {
-    StringTable strings;
     Lexer lexer(&strings);
     Parser parser;
-    Compiler compiler;
+    Compiler compiler(program);
 
     int c;
     while ((c = getchar()) != EOF)
@@ -63,9 +68,9 @@ int main()
     printBlock(astFile, "program", funs);
     fprintf(astFile, "\n");
 
-    compiler.feed(funs);
+    compiler.compile(funs);
     printf("Program compiled ok\n");
-    printCode(asmFile, compiler.program(), &strings);
+    printCode(asmFile, program, &strings);
 
     deleteChain(funs);
   }
@@ -94,6 +99,9 @@ int main()
     fclose(astFile);
   if (asmFile != stderr)
     fclose(asmFile);
+
+  Executor executor(program);
+  executor.run(strings.id("main"));
 
   return 0;
 }

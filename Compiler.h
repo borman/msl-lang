@@ -7,7 +7,10 @@
 class Compiler
 {
   public:
-    void feed(AST::Fun *funs);
+    Compiler(Program &prog)
+      : m_prog(prog) {}
+
+    void compile(AST::Fun *funs);
     Program &program() { return m_prog; }
   private:
     void compileFun(AST::Fun *fun);
@@ -47,7 +50,7 @@ class Compiler
     size_t emit(Instruction::Opcode opcode, T arg) { return m_prog.write(Instruction(opcode, arg)); }
     size_t emit(Instruction::Opcode opcode) { return m_prog.write(Instruction(opcode)); }
 
-    Program m_prog; 
+    Program &m_prog; 
 };
 
 #endif // COMPILER_H
