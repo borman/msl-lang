@@ -31,6 +31,10 @@ void Executor::exec(const Instruction &instr)
       trap(); // STUB
       break;
 
+    case Instruction::Dup:
+      push(m_valStack.top());
+      break;
+
 
       // Pop from stack
     case Instruction::PopVar:
@@ -212,6 +216,9 @@ void Executor::exec(const Instruction &instr)
     case Instruction::Trap:
       trap();
       break;
+
+    case Instruction::Trace:
+      break;
   }
 }
 
@@ -219,25 +226,25 @@ void Executor::exec(const Instruction &instr)
 
 void Executor::push(const Executor::Value &v)
 {
-  m_valstack.push(v);
+  m_valStack.push(v);
 }
 
 Executor::Value Executor::pop()
 {
-  Value v = m_valstack.top();
+  Value v = m_valStack.top();
   if (v.type == Value::TupOpen || v.type == Value::TupClose)
     badType();
-  m_valstack.pop();
+  m_valStack.pop();
   return v;
 }
 
 void Executor::popdelete()
 {
-  unsigned int level = 1;
+  unsigned int level = 0;
   do
   {
-    Value v = m_valstack.top();
-    m_valstack.pop();
+    Value v = m_valStack.top();
+    m_valStack.pop();
     if (v.type == Value::TupClose)
       level++;
     else if (v.type == Value::TupOpen)
@@ -247,10 +254,10 @@ void Executor::popdelete()
 
 Executor::Value Executor::pop(Executor::Value::Type type)
 {
-  Value v = m_valstack.top();
+  Value v = m_valStack.top();
   if (v.type != type)
     badType();
-  m_valstack.pop();
+  m_valStack.pop();
   return v;
 }
 
@@ -278,12 +285,13 @@ Executor::Value Executor::variable(unsigned int name)
 
 void Executor::setVariable(unsigned int name, const Executor::Value &val)
 {
+  const char *s_name = m_strings->str(name);
   switch (val.type)
   {
-    case Value::Int:    cerr.printf("%u <- %d\n", name, val.d.intval); break;
-    case Value::Real:   cerr.printf("%u <- %lf\n", name, val.d.realval); break;
-    case Value::Bool:   cerr.printf("%u <- %s\n", name, val.d.boolval? "TRUE" : "FALSE"); break;
-    case Value::String: cerr.printf("%u <- %u\n", name, val.d.strval); break;
+    case Value::Int:    cerr.printf("%s <- %d\n", s_name, val.d.intval); break;
+    case Value::Real:   cerr.printf("%s <- %lf\n", s_name, val.d.realval); break;
+    case Value::Bool:   cerr.printf("%s <- %s\n", s_name, val.d.boolval? "TRUE" : "FALSE"); break;
+    case Value::String: cerr.printf("%s <- %u\n", s_name, val.d.strval); break;
     default: break;
   };
   m_vars[name] = val;
@@ -291,7 +299,7 @@ void Executor::setVariable(unsigned int name, const Executor::Value &val)
 
 void Executor::call(unsigned int name, bool saveRet)
 {
-  cerr.printf("call %u\n", name);
+  cerr.printf("call %s\n", m_strings->str(name));
   for (size_t i=0; i<m_prog.entryCount(); i++)
     if (m_prog.entry(i).name.id() == name)
     {

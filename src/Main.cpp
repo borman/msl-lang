@@ -67,7 +67,7 @@ int main()
         e.text());
   }
 
-  Executor executor(program);
+  Executor executor(program, &strings);
   executor.run(strings.id("main"));
 
   return 0;

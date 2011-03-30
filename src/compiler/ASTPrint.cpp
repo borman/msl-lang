@@ -287,6 +287,7 @@ static void printInstr(File *dest, size_t addr, const Instruction &instr, String
     INSTR_A(PushArrayItem);
     INSTR_A(PopVar);
     INSTR_A(PopArrayItem);
+    INSTR(Dup);
     INSTR(PopDelete);
     INSTR(TupOpen);
     INSTR(TupClose);
@@ -307,6 +308,10 @@ static void printInstr(File *dest, size_t addr, const Instruction &instr, String
     INSTR_A(Call);
     INSTR(Return);
     INSTR(Trap);
+    case Instruction::Trace: 
+      printTree(dest, instr.arg.trace);
+      dest->printf("\n");
+      break;
 #undef INSTR
 #undef INSTR_G
 #undef INSTR_A

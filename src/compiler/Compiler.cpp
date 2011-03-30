@@ -41,6 +41,8 @@ void Compiler::compileBlock(Operator *block)
 
 void Compiler::compileOperator(Operator *op)
 {
+  emit(Instruction::Trace, op); // Trace
+
   switch (op->type())
   {
 #define OP(type) case Base::type: compile##type(op->as<type>()); break
@@ -113,8 +115,30 @@ void Compiler::compileWhile(While *ast)
 
 void Compiler::compileFor(For *ast)
 {
-  // Not to be implemented: should be converted to 'while' at AST analysis
-  emit(Instruction::Trap);
+  Int one(1);
+  Infix toPlusOne(Infix::Plus, &one, ast->to());
+  Infix varPlusOne(Infix::Plus, &one, ast->var());
+
+  // Prologue
+  compilePushExpr(ast->from());
+  compilePopVariable(ast->var());
+
+  // Test-prologue
+  compilePushExpr(&toPlusOne);
+  // Test
+  size_t l_loop = emit(Instruction::Dup);
+  compilePushVariable(ast->var());
+  emit(Instruction::TestGreater);
+  size_t j_exit = emit(Instruction::JumpIfNot); // jump @exit
+
+  // Body
+  compileBlock(ast->body());
+  compilePushExpr(&varPlusOne);
+  compilePopVariable(ast->var());
+  emit(Instruction::Jump, l_loop);
+
+  //@exit:
+  m_prog[j_exit].arg.addr = emit(Instruction::PopDelete);
 }
 
 void Compiler::compilePushExpr(Expression *expr)

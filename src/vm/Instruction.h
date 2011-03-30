@@ -2,13 +2,14 @@
 #define INSTRUCTION_H
 
 #include "Atom.h"
+#include "AST.h"
 
 struct Instruction
 {
   enum Opcode
   {
     // Push to stack
-    PushVar, PushInt, PushReal, PushBool, PushString, PushArrayItem,
+    PushVar, PushInt, PushReal, PushBool, PushString, PushArrayItem, Dup,
     // Pop from stack
     PopVar, PopArrayItem, PopDelete,
     // Tuple boundaries
@@ -19,8 +20,8 @@ struct Instruction
     TestLess, TestGreater, TestEqual,
     // Jumps
     Jump, JumpIfNot, Call, Return,
-    // Special
-    Trap
+    // Special (debug)
+    Trap, Trace
   };
   union Arg
   {
@@ -29,6 +30,7 @@ struct Instruction
     bool boolval;
     size_t addr;
     unsigned int atom;
+    AST::Base *trace;
   };
 
   Instruction(Opcode op=Trap, int intval=0)
@@ -41,6 +43,8 @@ struct Instruction
    : opcode(op) { arg.boolval = boolval; } 
   Instruction(Opcode op, const Atom &atom)
    : opcode(op) { arg.atom = atom.id(); } 
+  Instruction(Opcode op, AST::Base *trace)
+   : opcode(op) { arg.trace = trace; } 
 
   Opcode opcode;
   Arg arg;

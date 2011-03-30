@@ -21,7 +21,7 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Literal;
 
-      Literal(const Atom &s, const TextRegion &r)
+      Literal(const Atom &s, const TextRegion &r = TextRegion())
         : Expression(m_class_type, r), 
           m_text(s) {} 
 
@@ -35,7 +35,7 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Int;
 
-      Int(int v, const TextRegion &r)
+      Int(int v, const TextRegion &r = TextRegion())
         : Expression(m_class_type, r), 
           m_value(v) {} 
 
@@ -49,7 +49,7 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Real;
 
-      Real(double v, const TextRegion &r)
+      Real(double v, const TextRegion &r = TextRegion())
         : Expression(m_class_type, r), 
           m_value(v) {} 
 
@@ -63,7 +63,7 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Bool;
 
-      Bool(bool v, const TextRegion &r)
+      Bool(bool v, const TextRegion &r = TextRegion())
         : Expression(m_class_type, r), 
           m_value(v) {} 
 
@@ -79,7 +79,7 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::Variable;
 
-      Variable(const Atom &name, const TextRegion &r)
+      Variable(const Atom &name, const TextRegion &r = TextRegion())
         : Expression(m_class_type, r), 
           m_name(name) {} 
 
@@ -93,7 +93,7 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::FuncCall;
 
-      FuncCall(const Atom &name, Expression *arg, const TextRegion &r)
+      FuncCall(const Atom &name, Expression *arg, const TextRegion &r = TextRegion())
         : Expression(m_class_type, r), 
           m_name(name), m_arg(arg) {} 
 
@@ -111,7 +111,7 @@ namespace AST
     public:
       static const Base::Type m_class_type = Base::ArrayItem;
 
-      ArrayItem(const Atom &name, Expression *arg, const TextRegion &r)
+      ArrayItem(const Atom &name, Expression *arg, const TextRegion &r = TextRegion())
         : Expression(m_class_type, r),
           m_name(name), m_arg(arg) {} 
 
@@ -172,7 +172,8 @@ namespace AST
         And, Or
       };
 
-      Infix(Subtype subtype, Expression *left, Expression *right, const TextRegion &r)
+      Infix(Subtype subtype, Expression *left, Expression *right, 
+            const TextRegion &r = TextRegion())
         : Expression(m_class_type, r),
           m_subtype(subtype), m_left(left), m_right(right) {} 
 

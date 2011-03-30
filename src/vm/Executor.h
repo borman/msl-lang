@@ -4,12 +4,16 @@
 #include <stack>
 #include <map>
 #include "Program.h"
+#include "StringTable.h"
 
 class Executor
 {
   public:
     struct Value
     {
+      // Exception
+      class TypeMismatch {};
+
       enum Type
       {
         TupOpen, TupClose,
@@ -54,8 +58,9 @@ class Executor
           size_t m_addr;
     };
 
-    Executor(Program &program)
-      : m_prog(program), m_pc(0), m_stopped(true) {}
+    Executor(Program &program, StringTable *strings)
+      : m_prog(program), m_strings(strings),
+        m_pc(0), m_stopped(true) {}
 
     void run(unsigned int entryFun);
 
@@ -79,10 +84,11 @@ class Executor
     void step();
 
     Program &m_prog;
+    StringTable *m_strings;
     size_t m_pc;
     bool m_stopped;
     std::stack<size_t> m_callStack;
-    std::stack<Value> m_valstack;
+    std::stack<Value> m_valStack;
     std::map<unsigned int, Value> m_vars;
 };
 
