@@ -1,7 +1,7 @@
 #ifndef PROGRAM_H
 #define PROGRAM_H
 
-#include <vector>
+#include "Vector.h"
 #include "Instruction.h"
 
 class Program
@@ -9,7 +9,7 @@ class Program
   public:
     struct EntryPoint
     {
-      EntryPoint(const Atom &n, size_t a)
+      EntryPoint(const Atom &n=Atom(), size_t a=0)
         : name(n), addr(a) {}
       Atom name;
       size_t addr;
@@ -31,8 +31,8 @@ class Program
     const EntryPoint entry(size_t i) const { return m_entries[i]; }
     void addEntry(const EntryPoint &e) { m_entries.push_back(e); }
   private:
-    std::vector<Instruction> m_instrs;
-    std::vector<EntryPoint> m_entries;
+    Vector<Instruction> m_instrs;
+    Vector<EntryPoint> m_entries;
 };
 
 #endif // PROGRAM_H

@@ -55,7 +55,7 @@ class Executor
     };
 
     Executor(Program &program)
-      : m_prog(program), m_pc(0) {}
+      : m_prog(program), m_pc(0), m_stopped(true) {}
 
     void run(unsigned int entryFun);
 

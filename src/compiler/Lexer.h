@@ -1,7 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include <string>
+#include "String.h"
 #include "AST.h"
 #include "ListBuilder.h"
 #include "LexemGenerator.h"
@@ -54,7 +54,7 @@ class Lexer
   
     State m_state;
     bool m_is_literal;
-    std::string m_current_token;
+    String m_current_token;
     ListBuilder<AST::Base> m_tokens;
     TextRegion m_region;
     unsigned int m_row;

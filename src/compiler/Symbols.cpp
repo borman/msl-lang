@@ -1,3 +1,4 @@
+#include <cstring>
 #include "Symbols.h"
 
 using namespace AST;
@@ -34,10 +35,10 @@ const Symbols::Definition Symbols::symbolTbl[] =
 
 const int Symbols::symbolTblSize = sizeof(Symbols::symbolTbl)/sizeof(Symbols::Definition);
 
-Symbols::Ref Symbols::find(const std::string &str)
+Symbols::Ref Symbols::find(const char *str)
 {
   for (int i=0; i<symbolTblSize; i++)
-    if (str == symbolTbl[i].str)
+    if (0 == strcmp(str, symbolTbl[i].str))
       return Ref(i);
   return Ref(-1);
 }

@@ -1,6 +1,7 @@
 #ifndef LEXEMGENERATOR_H
 #define LEXEMGENERATOR_H
 
+#include "String.h"
 #include "AST.h"
 #include "ListBuilder.h"
 
@@ -10,17 +11,17 @@ class LexemGenerator
     class Exception
     {
       public:
-        Exception(const char *text, const std::string &token, 
+        Exception(const char *text, const char *token, 
                   const TextRegion &region) 
           : m_text(text), m_token(token), m_region(region) {}
 
         const char *text() const { return m_text; }
-        std::string token() const { return m_token; }
+        String token() const { return m_token; }
         TextRegion region() const { return m_region; }
 
       private:
         const char *m_text;
-        std::string m_token;
+        String m_token;
         TextRegion m_region;
     };
 

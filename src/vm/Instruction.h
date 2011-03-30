@@ -31,7 +31,7 @@ struct Instruction
     unsigned int atom;
   };
 
-  Instruction(Opcode op, int intval=0)
+  Instruction(Opcode op=Trap, int intval=0)
    : opcode(op) { arg.intval = intval; } 
   Instruction(Opcode op, size_t addr)
    : opcode(op) { arg.addr = addr; } 

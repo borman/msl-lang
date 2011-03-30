@@ -2,7 +2,6 @@
 #define SYMBOLS_H
 
 #include <cassert>
-#include <string>
 #include "AST.h"
 
 class Symbols
@@ -21,7 +20,7 @@ class Symbols
         friend class Symbols;
     };
 
-    static Ref find(const std::string &str);
+    static Ref find(const char *str);
     static const char *name(AST::Symbol::Subtype type);
 
   private:

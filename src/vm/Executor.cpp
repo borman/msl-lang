@@ -321,6 +321,7 @@ void Executor::run(unsigned int entryFun)
   push(Value::TupClose);
   call(entryFun, false);
   m_pc++;
+  m_stopped = false;
   while (!m_stopped)
     step();
 }

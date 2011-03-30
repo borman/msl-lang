@@ -1,7 +1,7 @@
 #ifndef STRINGTABLE_H
 #define STRINGTABLE_H
 
-#include <vector>
+#include "Vector.h"
 
 class StringTable
 {
@@ -13,7 +13,7 @@ class StringTable
   private:
     bool find(const char *str, unsigned int &where);
     unsigned int add(const char *str);
-    std::vector<char *> m_strs;
+    Vector<char *> m_strs;
 };
 
 #endif // STRINGTABLE_H

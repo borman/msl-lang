@@ -1,6 +1,6 @@
 ### PROJECT
 
-MODULES = compiler vm util
+MODULES = compiler vm util ministl
 SOURCE_DIRS = src $(addprefix src/,$(MODULES))
 SOURCES = $(notdir $(wildcard $(addsuffix /*.cpp,$(SOURCE_DIRS))))
 INCLUDEPATH = $(SOURCE_DIRS)
