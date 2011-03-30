@@ -1,5 +1,6 @@
-#include <cstdio>
+#include <cstddef>
 #include "Executor.h"
+#include "File.h"
 
 void Executor::exec(const Instruction &instr)
 {
@@ -279,10 +280,10 @@ void Executor::setVariable(unsigned int name, const Executor::Value &val)
 {
   switch (val.type)
   {
-    case Value::Int:    printf("%u <- %d\n", name, val.d.intval); break;
-    case Value::Real:   printf("%u <- %lf\n", name, val.d.realval); break;
-    case Value::Bool:   printf("%u <- %s\n", name, val.d.boolval? "TRUE" : "FALSE"); break;
-    case Value::String: printf("%u <- %u\n", name, val.d.strval); break;
+    case Value::Int:    cerr.printf("%u <- %d\n", name, val.d.intval); break;
+    case Value::Real:   cerr.printf("%u <- %lf\n", name, val.d.realval); break;
+    case Value::Bool:   cerr.printf("%u <- %s\n", name, val.d.boolval? "TRUE" : "FALSE"); break;
+    case Value::String: cerr.printf("%u <- %u\n", name, val.d.strval); break;
     default: break;
   };
   m_vars[name] = val;
@@ -290,7 +291,7 @@ void Executor::setVariable(unsigned int name, const Executor::Value &val)
 
 void Executor::call(unsigned int name, bool saveRet)
 {
-  printf("call %u\n", name);
+  cerr.printf("call %u\n", name);
   for (size_t i=0; i<m_prog.entryCount(); i++)
     if (m_prog.entry(i).name.id() == name)
     {
@@ -306,7 +307,7 @@ void Executor::ret()
 {
   if (!m_callStack.empty())
   {
-    printf("ret: @%04zu -> @%04zu\n", m_pc, m_callStack.top());
+    cerr.printf("ret: @%04zu -> @%04zu\n", m_pc, m_callStack.top());
     jump(m_callStack.top()+1);
     m_callStack.pop();
   }
