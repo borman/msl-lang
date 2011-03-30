@@ -1,7 +1,14 @@
 ### PROJECT
 
-TARGET := $(shell basename $(shell pwd))
-SOURCES := $(wildcard *.cpp)
+MODULES = compiler vm util
+SOURCE_DIRS = src $(addprefix src/,$(MODULES))
+SOURCES = $(notdir $(wildcard $(addsuffix /*.cpp,$(SOURCE_DIRS))))
+INCLUDEPATH = $(SOURCE_DIRS)
+
+vpath %.cpp $(SOURCE_DIRS)
+vpath %.h $(SOURCE_DIRS)
+
+TARGET := msl-lang
 
 ### CONFIG
 
@@ -9,7 +16,7 @@ BUILD_MODE ?= DEBUG
 
 ifeq ($(BUILD_MODE), RELEASE) 
 CXX = g++
-CXXFLAGS = -pipe -pedantic -Wall -Wextra -O2 -fopenmp -g
+CXXFLAGS = -pipe -pedantic -Wall -Wextra -O2 -g
 else
 CXX = g++
 CXXFLAGS = -pipe -Wall -Wextra -g2
@@ -28,8 +35,8 @@ endif
 OBJDIR := .obj
 DEPDIR := .dep
 
-CFLAGS += $(addprefix -I,$(INCLUDEPATH))
-CFLAGS += $(addprefix -D,$(DEFINES))
+CXXFLAGS += $(addprefix -I,$(INCLUDEPATH))
+CXXFLAGS += $(addprefix -D,$(DEFINES))
 OBJECTS := $(patsubst %.cpp,$(OBJDIR)/%.o,$(SOURCES))
 DEPENDS := $(patsubst %.cpp,$(DEPDIR)/%.d,$(SOURCES))
 
