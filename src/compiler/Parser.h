@@ -1,7 +1,6 @@
 #ifndef PARSER_h
 #define PARSER_H
 
-#include <string>
 #include "AST.h"
 #include "ListBuilder.h"
 

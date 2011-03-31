@@ -1,8 +1,8 @@
 #ifndef EXECUTOR_H
 #define EXECUTOR_h
 
-#include <stack>
-#include <map>
+#include "Stack.h"
+#include "Map.h"
 #include "Program.h"
 #include "StringTable.h"
 #include "Value.h"
@@ -64,9 +64,9 @@ class Executor
     StringTable *m_strings;
     size_t m_pc;
     bool m_stopped;
-    std::stack<size_t> m_callStack;
-    std::stack<Value> m_valStack;
-    std::map<unsigned int, Value> m_vars;
+    Stack<size_t> m_callStack;
+    Stack<Value> m_valStack;
+    Map<unsigned int, Value> m_vars;
 };
 
 #endif // EXECUTOR_H

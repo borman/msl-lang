@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <stack>
+#include "Stack.h"
 #include "Compiler.h"
 
 using namespace AST;
@@ -296,7 +296,7 @@ void Compiler::compilePopTuple(Tuple *expr)
 {
   emit(Instruction::TupUnClose);
   // Reverse contents
-  std::stack<Expression *> contents;
+  Stack<Expression *> contents;
   for (Expression *e = expr->contents(); e != NULL; e = e->next<Expression>())
     contents.push(e);
   while (!contents.empty())

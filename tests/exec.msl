@@ -18,9 +18,9 @@ end
 
 fun main []
   Q = gcd [7000, 7*9*1543]
-  S = 0.0
+  S = 0.3
   for I from 1 to 10
-    S = S + 1.1
+    S = S + I
   end
   [P, Q] = ds [10, 7]
 end

@@ -2,7 +2,7 @@
 #define ASTBASE_H
 
 #include <cassert>
-#include <string>
+#include <cstddef>
 #include "TextRegion.h"
 
 namespace AST

@@ -1,4 +1,5 @@
 #include <cstring>
+#include <cctype>
 #include "Lexer.h"
 
 void Lexer::feed(char c)
