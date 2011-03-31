@@ -40,6 +40,16 @@ VAL_OPERATOR(/)
 VAL_OPERATOR(>)
 VAL_OPERATOR(<)
 
+Value Value::operator >=(const Value &v) const
+{
+  return ! ((*this < v)->boolval);
+}
+
+Value Value::operator <=(const Value &v) const
+{
+  return ! ((*this > v)->boolval);
+}
+
 Value Value::operator %(const Value &v) const
 {
   if (m_type == Int && v.m_type == Int)
@@ -78,3 +88,4 @@ Value Value::operator ==(const Value &v) const
       throw TypeMismatch();
   }
 }
+

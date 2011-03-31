@@ -1,0 +1,28 @@
+; Imperative
+fun gcd [A, B]
+  if B > A then
+    [A, B] = [B, A]
+  end
+  while B > 0
+    [A, B] = [B, A%B]
+  end
+  return A
+end
+
+; Functional
+fun gcd_rec [A, B]
+  return if B > A 
+    then gcd_rec [B, A]
+    else if B > 0
+      then gcd_rec [B, A%B]
+      else A 
+end
+
+fun main []
+  [A, B] = [7000, 7*9*543]
+  ;do println ["gcd", A, B, "=", gcd [A, B]]
+  ;do println ["gcd_rec", A, B, "=", gcd_rec [A, B]]
+  for I from 1 to 10000
+    do gcd_rec [A, B]
+  end
+end

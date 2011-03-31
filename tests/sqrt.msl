@@ -1,0 +1,27 @@
+fun real A 
+  return A+0.0 
+end
+
+fun sqr X
+  return X*X
+end
+
+fun sqrt X
+  L = 0.0
+  R = real X
+  while R-L > 0.001
+    T = (L+R)/2
+    if T*T > X then
+      R = T
+    end else
+      L = T
+    end
+  end
+  return (L+R)/2
+end
+
+fun main []
+  for X from 1 to 20
+    do println ["sqrt", X, "=", sqrt X]
+  end
+end

@@ -302,6 +302,8 @@ static void printInstr(File *dest, size_t addr, const Instruction &instr, String
     INSTR(Or);
     INSTR(TestLess);
     INSTR(TestGreater);
+    INSTR(TestLessEqual);
+    INSTR(TestGreaterEqual);
     INSTR(TestEqual);
     INSTR_G(Jump, "@%04zu", instr.arg.addr);
     INSTR_G(JumpIfNot, "@%04zu", instr.arg.addr);

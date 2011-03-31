@@ -1,0 +1,23 @@
+fun listPrimes Max
+  for I from 2 to Max
+    if isPrime I then
+      do print I
+    end 
+  end
+  do println []
+end
+
+fun isPrime X
+  for I from 2 to X-1 
+    if X%I = 0 then
+      return false
+    end
+  end
+  return true
+end
+
+fun main []
+  Max = 100
+  do println ["Primes up to", Max]
+  do listPrimes Max
+end

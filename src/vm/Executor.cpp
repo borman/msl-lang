@@ -80,17 +80,19 @@ Value Executor::execBinOp(const Instruction &instr,
 {
   switch (instr.opcode)
   {
-    case Instruction::Add:         return left + right;
-    case Instruction::Sub:         return left - right;
-    case Instruction::Mul:         return left * right;
-    case Instruction::Div:         return left / right;
-    case Instruction::Mod:         return left % right;
-    case Instruction::And:         return left && right;
-    case Instruction::Or:          return left || right;
-    case Instruction::TestLess:    return left < right;
-    case Instruction::TestGreater: return left > right;
-    case Instruction::TestEqual:   return left == right;
-    default:                       trap(); return 0;
+    case Instruction::Add:              return left + right;
+    case Instruction::Sub:              return left - right;
+    case Instruction::Mul:              return left * right;
+    case Instruction::Div:              return left / right;
+    case Instruction::Mod:              return left % right;
+    case Instruction::And:              return left && right;
+    case Instruction::Or:               return left || right;
+    case Instruction::TestLess:         return left < right;
+    case Instruction::TestGreater:      return left > right;
+    case Instruction::TestEqual:        return left == right;
+    case Instruction::TestLessEqual:    return left <= right;
+    case Instruction::TestGreaterEqual: return left >= right;
+    default:                            trap(); return 0;
   }
 }
 
@@ -155,6 +157,7 @@ Value Executor::getVariable(unsigned int name)
 
 void Executor::setVariable(unsigned int name, const Value &val)
 {
+#if 0
   const char *s_name = m_strings->str(name);
   switch (val.type())
   {
@@ -168,12 +171,22 @@ void Executor::setVariable(unsigned int name, const Value &val)
                             m_pc, s_name, val->strval); break;
     default: break;
   };
+#endif
   return m_scope.top().setVar(name, val);
 }
 
 void Executor::call(unsigned int name, bool saveRet)
 {
+#if 0
   cerr.printf("call %s\n", m_strings->str(name));
+#endif
+
+  // Builtin
+  for (size_t i=0; i<m_builtins.size(); i++)
+    if (m_builtins[i]->call(name, m_valStack))
+      return;
+
+  // Declared
   for (size_t i=0; i<m_prog.entryCount(); i++)
     if (m_prog.entry(i).name.id() == name)
     {
@@ -191,7 +204,9 @@ void Executor::ret()
 {
   if (!m_callStack.empty())
   {
+#if 0
     cerr.printf("ret: @%04zu -> @%04zu\n", m_pc, m_callStack.top());
+#endif
     m_scope.pop(); // Close the variable scope
     jump(m_callStack.top()+1);
     m_callStack.pop();
@@ -230,3 +245,9 @@ void Executor::step()
   exec(m_prog[m_pc]);
   m_pc++;
 }
+
+void Executor::addBuiltin(AbstractBuiltin *b)
+{
+  m_builtins.push_back(b);
+}
+

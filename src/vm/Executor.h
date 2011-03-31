@@ -7,6 +7,7 @@
 #include "StringTable.h"
 #include "Value.h"
 #include "Scope.h"
+#include "Builtin.h"
 
 class Executor
 {
@@ -37,6 +38,7 @@ class Executor
       : m_prog(program), m_strings(strings),
         m_pc(0), m_stopped(true) {}
 
+    void addBuiltin(AbstractBuiltin *b);
     void run(unsigned int entryFun);
 
   private:
@@ -68,6 +70,7 @@ class Executor
     Stack<size_t> m_callStack;
     Stack<Value> m_valStack;
     Stack<Scope> m_scope;
+    Vector<AbstractBuiltin *> m_builtins;
 };
 
 #endif // EXECUTOR_H

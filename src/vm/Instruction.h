@@ -17,7 +17,7 @@ struct Instruction
     // Operations
     Add, Sub, Mul, Div, Mod, And, Or,
     // Tests
-    TestLess, TestGreater, TestEqual,
+    TestLess, TestGreater, TestEqual, TestLessEqual, TestGreaterEqual,
     // Jumps
     Jump, JumpIfNot, Call, Return,
     // Special (debug)
@@ -47,7 +47,7 @@ struct Instruction
    : opcode(op) { arg.trace = trace; } 
 
   bool isPush() const { return opcode >= PushVar && opcode <= TupClose; }
-  bool isBinOp() const { return opcode >= Add && opcode <= TestEqual; }
+  bool isBinOp() const { return opcode >= Add && opcode <= TestGreaterEqual; }
 
   Opcode opcode;
   Arg arg;

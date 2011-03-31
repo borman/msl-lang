@@ -60,6 +60,10 @@ class Vector
       m_data.reserve(m_size+1);
       m_data[m_size++] = new T(v);
     }
+    void pop_back()
+    {
+      resize(m_size-1);
+    }
   private:
     size_t m_size;
     Buffer<T *> m_data;

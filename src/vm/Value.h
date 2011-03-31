@@ -1,6 +1,8 @@
 #ifndef VALUE_H
 #define VALUE_H
 
+#include "File.h"
+
 class Value
 {
   public:
@@ -36,6 +38,8 @@ class Value
     Value operator %(const Value &v) const;
     Value operator >(const Value &v) const;
     Value operator <(const Value &v) const;
+    Value operator >=(const Value &v) const;
+    Value operator <=(const Value &v) const;
     Value operator ==(const Value &v) const;
     Value operator &&(const Value &v) const;
     Value operator ||(const Value &v) const;

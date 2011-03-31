@@ -115,30 +115,27 @@ void Compiler::compileWhile(While *ast)
 
 void Compiler::compileFor(For *ast)
 {
-  Int one(1);
-  Infix toPlusOne(Infix::Plus, &one, ast->to());
-  Infix varPlusOne(Infix::Plus, &one, ast->var());
-
   // Prologue
   compilePushExpr(ast->from());
   compilePopVariable(ast->var());
 
-  // Test-prologue
-  compilePushExpr(&toPlusOne);
   // Test
-  size_t l_loop = emit(Instruction::Dup);
+  size_t l_loop = m_prog.nextAddr();
+  compilePushExpr(ast->to());
   compilePushVariable(ast->var());
-  emit(Instruction::TestGreater);
+  emit(Instruction::TestGreaterEqual);
   size_t j_exit = emit(Instruction::JumpIfNot); // jump @exit
 
   // Body
   compileBlock(ast->body());
-  compilePushExpr(&varPlusOne);
+  compilePushVariable(ast->var());
+  emit(Instruction::PushInt, 1);
+  emit(Instruction::Add);
   compilePopVariable(ast->var());
   emit(Instruction::Jump, l_loop);
 
   //@exit:
-  m_prog[j_exit].arg.addr = emit(Instruction::PopDelete);
+  m_prog[j_exit].arg.addr = m_prog.nextAddr();
 }
 
 void Compiler::compilePushExpr(Expression *expr)

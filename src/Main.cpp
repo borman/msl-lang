@@ -37,13 +37,11 @@ int main()
 
     parser.feed(tokens);
     Fun *funs = parser.peek();
-    cout.printf("Program parsed ok\n");
 
     printBlock(&astFile, "program", funs);
     astFile.printf("\n");
 
     compiler.compile(funs);
-    cout.printf("Program compiled ok\n");
     printCode(&asmFile, program, &strings);
 
     deleteChain(funs);
@@ -72,7 +70,9 @@ int main()
 
   try
   {
+    BasicBuiltin builtins(&strings);
     Executor executor(program, &strings);
+    executor.addBuiltin(&builtins);
     executor.run(strings.id("main"));
   }
   catch (const Executor::Exception &e)
