@@ -8,15 +8,18 @@ template<class K, class V>
 class Map
 {
   public:
-    V at(const K &key) const
+    // Exception
+    class BadIndex {};
+
+    const V &at(const K &key) const
     {
       size_t pos;
       if (find(key, pos))
         return m_data[pos].val;
-      else throw "Map: bad index";
+      else throw BadIndex();
     }
     
-    V operator [](const K &key) const { return at(key); }
+    const V &operator [](const K &key) const { return at(key); }
     
     V &operator [](const K &key)
     {

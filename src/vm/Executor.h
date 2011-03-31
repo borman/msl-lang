@@ -6,6 +6,7 @@
 #include "Program.h"
 #include "StringTable.h"
 #include "Value.h"
+#include "Scope.h"
 
 class Executor
 {
@@ -44,7 +45,7 @@ class Executor
     Value pop(Value::Type t);
     void popdelete();
 
-    Value variable(unsigned int name);
+    Value getVariable(unsigned int name);
     void setVariable(unsigned int name, const Value &val);
 
     void call(unsigned int name, bool saveRet=true);
@@ -66,7 +67,7 @@ class Executor
     bool m_stopped;
     Stack<size_t> m_callStack;
     Stack<Value> m_valStack;
-    Map<unsigned int, Value> m_vars;
+    Stack<Scope> m_scope;
 };
 
 #endif // EXECUTOR_H

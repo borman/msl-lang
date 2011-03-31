@@ -62,7 +62,7 @@ Value Executor::execPush(const Instruction &instr)
 {
   switch (instr.opcode) 
   {
-    case Instruction::PushVar:       return variable(instr.arg.atom);
+    case Instruction::PushVar:       return getVariable(instr.arg.atom);
     case Instruction::PushInt:       return instr.arg.intval;
     case Instruction::PushReal:      return instr.arg.realval;
     case Instruction::PushBool:      return instr.arg.boolval;
@@ -148,11 +148,9 @@ void Executor::jump(size_t addr)
   m_pc = addr-1; // Will be incremented automatically
 }
 
-Value Executor::variable(unsigned int name)
+Value Executor::getVariable(unsigned int name)
 {
-  if (m_vars.count(name) == 0)
-    throw Exception(Exception::UndefVar, m_pc);
-  return m_vars[name];
+  return m_scope.top().getVar(name);
 }
 
 void Executor::setVariable(unsigned int name, const Value &val)
@@ -170,7 +168,7 @@ void Executor::setVariable(unsigned int name, const Value &val)
                             m_pc, s_name, val->strval); break;
     default: break;
   };
-  m_vars[name] = val;
+  return m_scope.top().setVar(name, val);
 }
 
 void Executor::call(unsigned int name, bool saveRet)
@@ -179,8 +177,10 @@ void Executor::call(unsigned int name, bool saveRet)
   for (size_t i=0; i<m_prog.entryCount(); i++)
     if (m_prog.entry(i).name.id() == name)
     {
+      // Do call
       if (saveRet)
         m_callStack.push(m_pc);
+      m_scope.push(Scope()); // Open new variable scope
       jump(m_prog.entry(i).addr);
       return;
     }
@@ -192,6 +192,7 @@ void Executor::ret()
   if (!m_callStack.empty())
   {
     cerr.printf("ret: @%04zu -> @%04zu\n", m_pc, m_callStack.top());
+    m_scope.pop(); // Close the variable scope
     jump(m_callStack.top()+1);
     m_callStack.pop();
   }
@@ -201,16 +202,27 @@ void Executor::ret()
     
 void Executor::run(unsigned int entryFun)
 {
-  push(Value::TupOpen);
-  push(Value::TupClose);
-  call(entryFun, false);
-  m_pc++;
-  m_stopped = false;
-  while (!m_stopped)
-    step();
+  try
+  {
+    push(Value::TupOpen);
+    push(Value::TupClose);
+    call(entryFun, false);
+    m_pc++;
+    m_stopped = false;
+    while (!m_stopped)
+      step();
 
-  // Remove function result from stack
-  popdelete();
+    // Remove function result from stack
+    popdelete();
+  }
+  catch (Value::TypeMismatch)
+  {
+    throw Exception(Exception::BadType, m_pc);
+  }
+  catch (Scope::VarNotFound)
+  {
+    throw Exception(Exception::UndefVar, m_pc);
+  }
 }
 
 void Executor::step()
