@@ -51,6 +51,7 @@ int main()
   catch (const Lexer::Exception &e)
   {
     cout.printf("stdin:%u:%u: Tokenizer error: %s\n", e.row()+1, e.col()+1, e.text());
+    return 1;
   }
   catch (const LexemGenerator::Exception &e)
   {
@@ -58,6 +59,7 @@ int main()
     cout.printf("stdin:%u:%u-%u:%u: Lexer error: %s in \"%s\"\n",
            r.startRow+1, r.startCol+1, r.endRow+1, r.endCol+1,
            e.text(), e.token().c_str());
+    return 1;
   }
   catch (const Parser::Exception &e)
   {
@@ -65,10 +67,27 @@ int main()
     cout.printf("stdin:%u:%u-%u:%u: Parser error: %s\n", 
         r.startRow+1, r.startCol+1, r.endRow+1, r.endCol+1,
         e.text());
+    return 1;
   }
 
-  Executor executor(program, &strings);
-  executor.run(strings.id("main"));
+  try
+  {
+    Executor executor(program, &strings);
+    executor.run(strings.id("main"));
+  }
+  catch (const Executor::Exception &e)
+  {
+    const char *descr = NULL;
+    switch (e.type())
+    {
+      case Executor::Exception::BadType: descr = "Types incompatible"; break;
+      case Executor::Exception::UndefVar: descr = "Undefined variable"; break;
+      case Executor::Exception::UndefFun: descr = "Undefined function"; break;
+      case Executor::Exception::Trap: descr = "Trap"; break;
+    }
+    cout.printf("Executor error: %s at %04zu\n", descr, e.addr());
+    return 1;
+  }
 
   return 0;
 }
