@@ -4,235 +4,107 @@
 
 void Executor::exec(const Instruction &instr)
 {
-  switch (instr.opcode)
+  if (instr.isPush())
+    push(execPush(instr));
+  else if (instr.isBinOp())
   {
-    // Push to stack
-    case Instruction::PushVar:
-      push(variable(instr.arg.atom));
-      break;
-
-    case Instruction::PushInt:
-      push(instr.arg.intval);
-      break;
-
-    case Instruction::PushReal:
-      push(instr.arg.realval);
-      break;
-
-    case Instruction::PushBool:
-      push(instr.arg.boolval);
-      break;
-
-    case Instruction::PushString:
-      push(instr.arg.atom);
-      break;
-
-    case Instruction::PushArrayItem:
-      trap(); // STUB
-      break;
-
-    case Instruction::Dup:
-      push(m_valStack.top());
-      break;
-
-
+    Value right = pop();
+    Value left = pop();
+    push(execBinOp(instr, left, right));
+  }
+  else switch (instr.opcode)
+  {
       // Pop from stack
     case Instruction::PopVar:
       setVariable(instr.arg.atom, pop());
       break;
-
     case Instruction::PopArrayItem:
       trap(); // STUB
       break;
-
     case Instruction::PopDelete:
       popdelete();
       break;
 
-
       // Tuple boundaries
-    case Instruction::TupOpen:
-      push(Value::TupOpen);
-      break;
-
-    case Instruction::TupClose:
-      push(Value::TupClose);
-      break;
-
     case Instruction::TupUnOpen:
       pop(Value::TupOpen);
       break;
-
     case Instruction::TupUnClose:
       pop(Value::TupClose);
       break;
-
-
-      // Operations
-    case Instruction::Add:
-    {
-      Value right = pop();
-      Value left = pop();
-      if (left.type == right.type && left.type == Value::Int)
-        push(left.d.intval + right.d.intval);
-      else if (left.type == right.type && left.type == Value::Real)
-        push(left.d.realval + right.d.realval);
-      else 
-        badType();
-    } break;
-
-    case Instruction::Sub:
-    {
-      Value right = pop();
-      Value left = pop();
-      if (left.type == right.type && left.type == Value::Int)
-        push(left.d.intval - right.d.intval);
-      else if (left.type == right.type && left.type == Value::Real)
-        push(left.d.realval - right.d.realval);
-      else 
-        badType();
-    } break;
-
-    case Instruction::Mul:
-    {
-      Value right = pop();
-      Value left = pop();
-      if (left.type == right.type && left.type == Value::Int)
-        push(left.d.intval * right.d.intval);
-      else if (left.type == right.type && left.type == Value::Real)
-        push(left.d.realval * right.d.realval);
-      else 
-        badType();
-    } break;
-
-    case Instruction::Div:
-    {
-      Value right = pop();
-      Value left = pop();
-      if (left.type == right.type && left.type == Value::Int)
-        push(left.d.intval / right.d.intval);
-      else if (left.type == right.type && left.type == Value::Real)
-        push(left.d.realval / right.d.realval);
-      else 
-        badType();
-    } break;
-
-    case Instruction::Mod:
-    {
-      Value right = pop();
-      Value left = pop();
-      if (left.type == right.type && left.type == Value::Int)
-        push(left.d.intval % right.d.intval);
-      else 
-        badType();
-    } break;
-
-    case Instruction::And:
-    {
-      Value right = pop();
-      Value left = pop();
-      if (left.type == right.type && left.type == Value::Bool)
-        push(left.d.boolval && right.d.boolval);
-      else 
-        badType();
-    } break;
-
-    case Instruction::Or:
-    {
-      Value right = pop();
-      Value left = pop();
-      if (left.type == right.type && left.type == Value::Bool)
-        push(left.d.boolval || right.d.boolval);
-      else 
-        badType();
-    } break;
-
-
-      // Tests
-    case Instruction::TestLess:
-    {
-      Value right = pop();
-      Value left = pop();
-      if (left.type == right.type && left.type == Value::Int)
-        push(left.d.intval < right.d.intval);
-      else if (left.type == right.type && left.type == Value::Real)
-        push(left.d.realval < right.d.realval);
-      else 
-        badType();
-    } break;
-
-    case Instruction::TestGreater:
-    {
-      Value right = pop();
-      Value left = pop();
-      if (left.type == right.type && left.type == Value::Int)
-        push(left.d.intval > right.d.intval);
-      else if (left.type == right.type && left.type == Value::Real)
-        push(left.d.realval > right.d.realval);
-      else 
-        badType();
-    } break;
-
-    case Instruction::TestEqual:
-    {
-      Value right = pop();
-      Value left = pop();
-      if (left.type == right.type)
-      {
-        switch (left.type)
-        {
-          case Value::Int:    push(left.d.intval == right.d.intval); break;
-          case Value::Real:   push(left.d.realval == right.d.realval); break; // FIXME
-          case Value::Bool:   push(left.d.boolval == right.d.boolval); break;
-          case Value::String: push(left.d.strval == right.d.strval); break;
-          default: badType();
-        }
-      }
-      else 
-        badType();
-    } break;
-
 
       // Jumps
     case Instruction::Jump:
       jump(instr.arg.addr);
       break;
-
     case Instruction::JumpIfNot:
-      if (!pop(Value::Bool).d.boolval)
+      if (!pop(Value::Bool)->boolval)
         jump(instr.arg.addr);
       break;
-
     case Instruction::Call:
       call(instr.arg.atom);
       break;
-
     case Instruction::Return:
       ret();
       break;
 
-
       // Special
+    case Instruction::Trace:
+      break;
+    default:
     case Instruction::Trap:
       trap();
       break;
+  }
+}
 
-    case Instruction::Trace:
-      break;
+Value Executor::execPush(const Instruction &instr)
+{
+  switch (instr.opcode) 
+  {
+    case Instruction::PushVar:       return variable(instr.arg.atom);
+    case Instruction::PushInt:       return instr.arg.intval;
+    case Instruction::PushReal:      return instr.arg.realval;
+    case Instruction::PushBool:      return instr.arg.boolval;
+    case Instruction::PushString:    return instr.arg.atom;
+    case Instruction::PushArrayItem: trap(); // STUB
+    case Instruction::Dup:           return m_valStack.top();
+    case Instruction::TupOpen:       return Value::TupOpen;
+    case Instruction::TupClose:      return Value::TupClose;
+    default:                         trap(); return 0;
+  }
+}
+
+Value Executor::execBinOp(const Instruction &instr, 
+    const Value &left, const Value &right)
+{
+  switch (instr.opcode)
+  {
+    case Instruction::Add:         return left + right;
+    case Instruction::Sub:         return left - right;
+    case Instruction::Mul:         return left * right;
+    case Instruction::Div:         return left / right;
+    case Instruction::Mod:         return left % right;
+    case Instruction::And:         return left && right;
+    case Instruction::Or:          return left || right;
+    case Instruction::TestLess:    return left < right;
+    case Instruction::TestGreater: return left > right;
+    case Instruction::TestEqual:   return left == right;
+    default:                       trap(); return 0;
   }
 }
 
 // ======== Helpers ========
 
-void Executor::push(const Executor::Value &v)
+void Executor::push(const Value &v)
 {
   m_valStack.push(v);
 }
 
-Executor::Value Executor::pop()
+Value Executor::pop()
 {
   Value v = m_valStack.top();
-  if (v.type == Value::TupOpen || v.type == Value::TupClose)
+  if (v.type() == Value::TupOpen || v.type() == Value::TupClose)
     badType();
   m_valStack.pop();
   return v;
@@ -245,17 +117,17 @@ void Executor::popdelete()
   {
     Value v = m_valStack.top();
     m_valStack.pop();
-    if (v.type == Value::TupClose)
+    if (v.type() == Value::TupClose)
       level++;
-    else if (v.type == Value::TupOpen)
+    else if (v.type() == Value::TupOpen)
       level--;
   } while (level>0);
 }
 
-Executor::Value Executor::pop(Executor::Value::Type type)
+Value Executor::pop(Value::Type type)
 {
   Value v = m_valStack.top();
-  if (v.type != type)
+  if (v.type() != type)
     badType();
   m_valStack.pop();
   return v;
@@ -276,22 +148,26 @@ void Executor::jump(size_t addr)
   m_pc = addr-1; // Will be incremented automatically
 }
 
-Executor::Value Executor::variable(unsigned int name)
+Value Executor::variable(unsigned int name)
 {
   if (m_vars.count(name) == 0)
     throw Exception(Exception::UndefVar, m_pc);
   return m_vars[name];
 }
 
-void Executor::setVariable(unsigned int name, const Executor::Value &val)
+void Executor::setVariable(unsigned int name, const Value &val)
 {
   const char *s_name = m_strings->str(name);
-  switch (val.type)
+  switch (val.type())
   {
-    case Value::Int:    cerr.printf("%s <- %d\n", s_name, val.d.intval); break;
-    case Value::Real:   cerr.printf("%s <- %lf\n", s_name, val.d.realval); break;
-    case Value::Bool:   cerr.printf("%s <- %s\n", s_name, val.d.boolval? "TRUE" : "FALSE"); break;
-    case Value::String: cerr.printf("%s <- %u\n", s_name, val.d.strval); break;
+    case Value::Int:    cerr.printf("@%04zu: %s <- %d\n", 
+                            m_pc, s_name, val->intval); break;
+    case Value::Real:   cerr.printf("@%04zu: %s <- %lf\n", 
+                            m_pc, s_name, val->realval); break;
+    case Value::Bool:   cerr.printf("@%04zu: %s <- %s\n", 
+                            m_pc, s_name, val->boolval? "TRUE" : "FALSE"); break;
+    case Value::String: cerr.printf("@%04zu: %s <- %u\n", 
+                            m_pc, s_name, val->strval); break;
     default: break;
   };
   m_vars[name] = val;

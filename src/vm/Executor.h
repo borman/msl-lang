@@ -5,37 +5,11 @@
 #include <map>
 #include "Program.h"
 #include "StringTable.h"
+#include "Value.h"
 
 class Executor
 {
   public:
-    struct Value
-    {
-      // Exception
-      class TypeMismatch {};
-
-      enum Type
-      {
-        TupOpen, TupClose,
-        Int, Real, Bool, String
-      };
-      union Data
-      {
-        int intval;
-        double realval;
-        bool boolval;
-        unsigned int strval;
-      };
-
-      Value(int i = 0):          type(Int)    { d.intval = i; }
-      Value(double r):       type(Real)   { d.realval = r; }
-      Value(bool b):         type(Bool)   { d.boolval = b; }
-      Value(unsigned int s): type(String) { d.strval = s; }
-      Value(Type t):         type(t)      {}
-
-      Type type;
-      Data d;
-    };
     class Exception
     {
       public:
@@ -81,6 +55,9 @@ class Executor
     void badType();
 
     void exec(const Instruction &instr);
+    Value execPush(const Instruction &instr);
+    Value execBinOp(const Instruction &instr, 
+        const Value &left, const Value &right);
     void step();
 
     Program &m_prog;

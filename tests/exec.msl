@@ -12,10 +12,15 @@ fun gcd [A, B]
   return A
 end
 
+fun ds [A, B]
+  return [A+B, A-B]
+end
+
 fun main []
   Q = gcd [7000, 7*9*1543]
   S = 0.0
   for I from 1 to 10
     S = S + 1.1
   end
+  [P, Q] = ds [10, 7]
 end

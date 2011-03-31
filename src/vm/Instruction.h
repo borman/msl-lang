@@ -10,10 +10,10 @@ struct Instruction
   {
     // Push to stack
     PushVar, PushInt, PushReal, PushBool, PushString, PushArrayItem, Dup,
-    // Pop from stack
-    PopVar, PopArrayItem, PopDelete,
     // Tuple boundaries
     TupOpen, TupClose, TupUnOpen, TupUnClose,
+    // Pop from stack
+    PopVar, PopArrayItem, PopDelete,
     // Operations
     Add, Sub, Mul, Div, Mod, And, Or,
     // Tests
@@ -45,6 +45,9 @@ struct Instruction
    : opcode(op) { arg.atom = atom.id(); } 
   Instruction(Opcode op, AST::Base *trace)
    : opcode(op) { arg.trace = trace; } 
+
+  bool isPush() const { return opcode >= PushVar && opcode <= TupClose; }
+  bool isBinOp() const { return opcode >= Add && opcode <= TestEqual; }
 
   Opcode opcode;
   Arg arg;
