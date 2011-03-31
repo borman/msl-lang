@@ -208,6 +208,9 @@ void Executor::run(unsigned int entryFun)
   m_stopped = false;
   while (!m_stopped)
     step();
+
+  // Remove function result from stack
+  popdelete();
 }
 
 void Executor::step()
