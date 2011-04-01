@@ -6,8 +6,8 @@
 #include "Builtin.h"
 #include "ASTPrint.h"
 #include "File.h"
+#include "FileCharSource.h"
 
-const char tokensFileName[] = "tokens.txt";
 const char astFileName[] = "ast.lisp";
 const char asmFileName[] = "asm.lst";
 
@@ -20,24 +20,15 @@ int main()
   
   try
   {
-    File tokensFile(tokensFileName);
     File astFile(astFileName);
     File asmFile(asmFileName);
 
-    Lexer lexer(&strings);
-    Parser parser;
+    FileCharSource input(&cin);
+    Lexer lexer(&input, &strings);
+    Parser parser(&lexer);
     Compiler compiler(program);
 
-    int c;
-    while ((c = cin.getc()) != EOF)
-      lexer.feed(c);
-    lexer.feed('\n');
-    Base *tokens = lexer.peek();
-
-    printTokens(&tokensFile, tokens);
-
-    parser.feed(tokens);
-    Fun *funs = parser.peek();
+    Fun *funs = parser.getAll();
 
     printBlock(&astFile, "program", funs);
     astFile.printf("\n");

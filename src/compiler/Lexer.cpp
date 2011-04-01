@@ -1,6 +1,26 @@
 #include <cstring>
+#include <cstdio>
 #include <cctype>
 #include "Lexer.h"
+#include "File.h"
+
+AST::Base *Lexer::getNext()
+{
+  while (m_tokens.empty())
+  {
+    int c = m_source->getNext();
+    if (c == EOF)
+    {
+      feed('\n');
+      if (m_state != S_Whitespace)
+        throw Exception(m_row, m_col, "Unexpected end of input");
+      break;
+    }
+    else
+      feed(c);
+  }
+  return m_tokens.takeFirst();
+}
 
 void Lexer::feed(char c)
 {

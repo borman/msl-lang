@@ -3,8 +3,9 @@
 
 #include "AST.h"
 #include "ListBuilder.h"
+#include "DataSource.h"
 
-class Parser
+class Parser: public DataSource<AST::Fun *>
 {
   public:
     class Exception
@@ -19,9 +20,11 @@ class Parser
         TextRegion m_region;
     };
 
-    ~Parser() { AST::deleteChain(m_tokens); }
-    void feed(AST::Base *tokens);
-    AST::Fun *peek();
+    Parser(DataSource<AST::Base *> *source): m_source(source), m_next(NULL) {}
+    ~Parser() { delete m_next; }
+
+    virtual AST::Fun *getNext();
+    AST::Fun *getAll();
 
   private:
     AST::Fun *readFun();
@@ -52,21 +55,25 @@ class Parser
     AST::Expression *foldAll(AST::Expression *formula);
 
     template<class T>
-    T *head() { return m_tokens->as<T>(); }
-
-    template<class T>
-    T *takeHead()
+    T *next() 
     {
-      T *h = head<T>();
-      m_tokens = h->template next<AST::Base>();
-      h->setNext(NULL);
-      return h;
+      if (m_next == NULL)
+        m_next = m_source->getNext();
+      return m_next->as<T>(); 
     }
 
-    void popHead() { delete takeHead<AST::Base>(); }
+    template<class T>
+    T *takeNext()
+    {
+      T *n = next<T>();
+      m_next = m_source->getNext();
+      return n;
+    }
 
-    AST::Base *m_tokens;
-    ListBuilder<AST::Base> m_token_queue;
+    void deleteNext() { delete takeNext<AST::Base>(); }
+
+    DataSource<AST::Base *> *m_source;
+    AST::Base *m_next;
 };
 
 #endif // PARSER_H

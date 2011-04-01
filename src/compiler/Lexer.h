@@ -5,8 +5,9 @@
 #include "AST.h"
 #include "ListBuilder.h"
 #include "LexemGenerator.h"
+#include "DataSource.h"
 
-class Lexer
+class Lexer: public DataSource<AST::Base *>
 {
   public:
     class Exception
@@ -25,12 +26,13 @@ class Lexer
         const char *m_text;
     };
 
-    Lexer(StringTable *table)
+    Lexer(DataSource<int> *source, StringTable *table)
       : m_state(S_Whitespace), m_is_literal(false), 
-        m_row(0), m_col(0), m_lexgen(table) {}
+        m_row(0), m_col(0), m_source(source), m_lexgen(table) {}
     
-    void feed(char c); 
-    AST::Base *peek() { return m_tokens.takeAll(); }
+    // Reimplemented from DataSource<AST::Base *>
+    virtual AST::Base *getNext();
+
   private:
     enum State
     {
@@ -40,6 +42,8 @@ class Lexer
       S_Token,
       S_Comment
     };
+
+    void feed(char c); 
 
     State stateWhitespace(char c);
     State stateQuoted(char c);
@@ -60,6 +64,7 @@ class Lexer
     unsigned int m_row;
     unsigned int m_col;
 
+    DataSource<int> *m_source;
     LexemGenerator m_lexgen;
 };
 

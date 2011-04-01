@@ -5,18 +5,21 @@ using namespace AST;
 
 // TODO: Track text regions
 
-void Parser::feed(Base *tokens)
+Fun *Parser::getAll()
 {
-  m_token_queue.add(tokens);
+  Fun *t;
+  ListBuilder<Fun> funs;
+  while ((t = getNext()) != NULL)
+    funs.add(t);
+  return funs.takeAll();
 }
 
-Fun *Parser::peek()
+Fun *Parser::getNext()
 {
-  m_tokens = m_token_queue.takeAll();
-  ListBuilder<Fun> funs;
-  while (m_tokens != NULL)
-    funs.add(readFun());
-  return funs.takeAll();
+  if (next<Base>() == NULL)
+    return NULL;
+  else
+    return readFun();
 }
 
 
@@ -25,8 +28,8 @@ Fun *Parser::readFun()
   consumeSym(Symbol::Fun);
   
   expect(Base::FuncCall);
-  const Atom name = head<FuncCall>()->name();
-  popHead();
+  const Atom name = next<FuncCall>()->name();
+  deleteNext();
 
   SafePtr<Expression> arg(readSExpr());
   expectLValue(arg.keep());
@@ -100,7 +103,7 @@ Operator *Parser::readOperatorFor()
 {
   consumeSym(Symbol::For);
   expect(Base::Variable);
-  SafePtr<Variable> var(takeHead<Variable>());
+  SafePtr<Variable> var(takeNext<Variable>());
   consumeSym(Symbol::From);
   SafePtr<Expression> from(readExpr());
   consumeSym(Symbol::To);
@@ -138,7 +141,7 @@ Expression *Parser::readExpr()
   {
     sexprs.add(readSExpr());
     if (nextIs(Base::Infix))
-      sexprs.add(takeHead<Infix>());
+      sexprs.add(takeNext<Infix>());
     else
       finished = true;
   } while (!finished);
@@ -150,7 +153,7 @@ Expression *Parser::readSExpr()
   if (nextIs(Base::Int) || nextIs(Base::Real) || nextIs(Base::Bool)
    || nextIs(Base::Literal) || nextIs(Base::Variable))
   {
-    return static_cast<Expression *>(takeHead<Base>());
+    return static_cast<Expression *>(takeNext<Base>());
   }
   else if (nextIs(Base::FuncCall))
     return readSExprFuncCall();
@@ -163,13 +166,13 @@ Expression *Parser::readSExpr()
   else if (nextIsSym(Symbol::LBracket))
     return readSExprTuple();
   else 
-    throw Exception("Expression expected", m_tokens->region());
+    throw Exception("Expression expected", next<Base>()->region());
 }
 
 // FUNCTION CALL
 Expression *Parser::readSExprFuncCall()
 {
-  SafePtr<FuncCall> func(takeHead<FuncCall>());
+  SafePtr<FuncCall> func(takeNext<FuncCall>());
   SafePtr<Expression> arg(readSExpr());
   func->bind(arg);
   return func;
@@ -178,7 +181,7 @@ Expression *Parser::readSExprFuncCall()
 // ARRAY ITEM
 Expression *Parser::readSExprArrayItem()
 {
-  SafePtr<ArrayItem> array(takeHead<ArrayItem>());
+  SafePtr<ArrayItem> array(takeNext<ArrayItem>());
   SafePtr<Expression> arg(readSExpr());
   array->bind(arg);
   return array;
@@ -294,27 +297,27 @@ Expression *Parser::foldAll(Expression *formula)
 bool Parser::nextIsSym(Symbol::Subtype t)
 {
   return nextIs(Base::Symbol)
-      && head<Symbol>()->subtype() == t;
+      && next<Symbol>()->subtype() == t;
 }
 
 void Parser::consumeSym(Symbol::Subtype t)
 {
   if (!nextIsSym(t))
-    throw Exception("Symbol expectation failed", m_tokens->region());
+    throw Exception("Symbol expectation failed", next<Base>()->region());
   else
-    popHead();
+    deleteNext();
 }
 
 bool Parser::nextIs(Base::Type t)
 {
-  return head<Base>() != NULL 
-      && head<Base>()->type() == t;
+  return next<Base>() != NULL 
+      && next<Base>()->type() == t;
 }
 
 void Parser::expect(Base::Type t)
 {
   if (!nextIs(t))
-    throw Exception("Class expectation failed", m_tokens->region());
+    throw Exception("Class expectation failed", next<Base>()->region());
 }
 
 void Parser::expectLValue(Expression *expr)
@@ -336,9 +339,9 @@ void Parser::expectLValue(Expression *expr)
 
 void Parser::expectEqualSign()
 {
-  if (nextIs(Base::Infix) && head<Infix>()->subtype() == Infix::Equals)
-    popHead();
+  if (nextIs(Base::Infix) && next<Infix>()->subtype() == Infix::Equals)
+    deleteNext();
   else
-    throw Exception("Assignment operator expected", m_tokens->region());
+    throw Exception("Assignment operator expected", next<Base>()->region());
 }
 

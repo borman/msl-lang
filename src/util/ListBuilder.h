@@ -29,6 +29,16 @@ class ListBuilder
       return res;
     }
 
+    T *takeFirst()
+    {
+      if (m_head == m_tail)
+        return takeAll();
+      T *head = m_head;
+      m_head = m_head->template next<T>();
+      head->setNext(NULL);
+      return head;
+    }
+
     bool empty() const { return m_head == NULL; }
   private:
     T *m_head;
