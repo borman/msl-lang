@@ -4,24 +4,27 @@
 #include "Stack.h"
 #include "Value.h"
 #include "StringTable.h"
+#include "Executor.h"
 
 class AbstractBuiltin
 {
   public:
-    virtual bool call(unsigned int name, Stack<Value> &stack) = 0;
+    virtual bool call(unsigned int name, Executor::Context &context) = 0;
 };
 
 class BasicBuiltin: public AbstractBuiltin
 {
   public:
     BasicBuiltin(StringTable *strings);
-    virtual bool call(unsigned int name, Stack<Value> &stack);
+    virtual bool call(unsigned int name, Executor::Context &context);
 
   private:
-    void print(Stack<Value> &stack);
-    void println(Stack<Value> &stack);
-    void stackTrace(Stack<Value> &stack);
+    void array(Executor::Context &context);
+    void print(Executor::Context &context);
+    void println(Executor::Context &context);
+    void stackTrace(Executor::Context &context);
 
+    unsigned int m_arrayId;
     unsigned int m_printId;
     unsigned int m_printlnId;
     unsigned int m_stackTraceId;

@@ -12,21 +12,20 @@ class Value
     enum Type
     {
       TupOpen, TupClose,
-      Int, Real, Bool, String
+      Int, Real, Bool, String, Array
     };
     union Data
     {
-      int intval;
-      double realval;
-      bool boolval;
-      unsigned int strval;
+      int asInt;
+      double asReal;
+      bool asBool;
+      unsigned int asHandle;
     };
 
-    Value(int i = 0):      m_type(Int)    { d.intval = i; }
-    Value(double r):       m_type(Real)   { d.realval = r; }
-    Value(bool b):         m_type(Bool)   { d.boolval = b; }
-    Value(unsigned int s): m_type(String) { d.strval = s; }
-    Value(Type t):         m_type(t)      {}
+    Value(int i=0):                  m_type(Int)    { d.asInt = i; }
+    Value(double r):                 m_type(Real)   { d.asReal = r; }
+    Value(bool b):                   m_type(Bool)   { d.asBool = b; }
+    Value(Type t, unsigned int h=0): m_type(t)      { d.asHandle = h; }
 
     const Data *operator ->() const { return &d; }
     Type type() const { return m_type; }

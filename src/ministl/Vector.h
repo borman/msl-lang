@@ -7,7 +7,7 @@ template<class T>
 class Vector
 {
   public:
-    Vector(): m_size(0) {}
+    Vector(size_t size = 0): m_size(0) { resize(size); }
     ~Vector() { clear(); }
 
     Vector(const Vector<T> &other)

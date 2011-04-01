@@ -3,6 +3,7 @@
 #include "Parser.h"
 #include "Compiler.h"
 #include "Executor.h"
+#include "Builtin.h"
 #include "ASTPrint.h"
 #include "File.h"
 

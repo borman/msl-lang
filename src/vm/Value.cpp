@@ -7,10 +7,10 @@ Value Value::operator +(const Value &v) const
       && (v.m_type == Int || v.m_type == Real))
   {
     if (m_type == Int && v.m_type == Int)
-      return d.intval + v.d.intval;
+      return d.asInt + v.d.asInt;
     else
-      return (m_type == Int? double(d.intval)   : d.realval)
-         + (v.m_type == Int? double(v.d.intval) : v.d.realval);
+      return (m_type == Int? double(d.asInt)   : d.asReal)
+         + (v.m_type == Int? double(v.d.asInt) : v.d.asReal);
   }
   else 
     throw TypeMismatch();
@@ -24,10 +24,10 @@ Value Value::operator _OP(const Value &v) const \
       && (v.m_type == Int || v.m_type == Real)) \
   { \
     if (m_type == Int && v.m_type == Int) \
-      return d.intval _OP v.d.intval; \
+      return d.asInt _OP v.d.asInt; \
     else \
-      return (m_type == Int? double(d.intval)   : d.realval) \
-        _OP (v.m_type == Int? double(v.d.intval) : v.d.realval); \
+      return (m_type == Int? double(d.asInt)   : d.asReal) \
+        _OP (v.m_type == Int? double(v.d.asInt) : v.d.asReal); \
   } \
   else \
     throw TypeMismatch(); \
@@ -42,18 +42,18 @@ VAL_OPERATOR(<)
 
 Value Value::operator >=(const Value &v) const
 {
-  return ! ((*this < v)->boolval);
+  return ! ((*this < v)->asBool);
 }
 
 Value Value::operator <=(const Value &v) const
 {
-  return ! ((*this > v)->boolval);
+  return ! ((*this > v)->asBool);
 }
 
 Value Value::operator %(const Value &v) const
 {
   if (m_type == Int && v.m_type == Int)
-    return d.intval % v.d.intval;
+    return d.asInt % v.d.asInt;
   else 
     throw TypeMismatch();
 }
@@ -61,7 +61,7 @@ Value Value::operator %(const Value &v) const
 Value Value::operator &&(const Value &v) const
 {
   if (m_type == Bool && v.m_type == Bool)
-    return d.boolval && v.d.boolval;
+    return d.asBool && v.d.asBool;
   else
     throw TypeMismatch();
 }
@@ -69,7 +69,7 @@ Value Value::operator &&(const Value &v) const
 Value Value::operator ||(const Value &v) const
 {
   if (m_type == Bool && v.m_type == Bool)
-    return d.boolval || v.d.boolval;
+    return d.asBool || v.d.asBool;
   else
     throw TypeMismatch();
 }
@@ -80,10 +80,10 @@ Value Value::operator ==(const Value &v) const
     return false;
   switch (m_type)
   {
-    case Int: return d.intval == v.d.intval;
-    case Real: return d.realval == v.d.intval; // FIXME: EPSILON
-    case Bool: return d.boolval == v.d.boolval;
-    case String: return d.strval == v.d.strval;
+    case Int: return d.asInt == v.d.asInt;
+    case Real: return d.asReal == v.d.asInt; // FIXME: EPSILON
+    case Bool: return d.asBool == v.d.asBool;
+    case String: return d.asHandle == v.d.asHandle;
     default:
       throw TypeMismatch();
   }

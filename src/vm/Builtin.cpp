@@ -5,33 +5,41 @@
 BasicBuiltin::BasicBuiltin(StringTable *strings)
   : m_strings(strings)
 {
+  m_arrayId = strings->id("array");
   m_printId = strings->id("print");
   m_printlnId = strings->id("println");
   m_stackTraceId = strings->id("stackTrace");
 }
 
-bool BasicBuiltin::call(unsigned int name, Stack<Value> &stack)
+bool BasicBuiltin::call(unsigned int name, Executor::Context &context)
 {
-  if (name==m_printId)
-    print(stack);
+  if (name==m_arrayId)
+    array(context);
+  else if (name==m_printId)
+    print(context);
   else if (name == m_printlnId)
-    println(stack);
+    println(context);
   else if (name == m_stackTraceId)
-    stackTrace(stack);
+    stackTrace(context);
   else
     return false;
   return true;
 }
 
 
-void BasicBuiltin::print(Stack<Value> &stack)
+void BasicBuiltin::array(Executor::Context &context)
+{
+  Value size = context.pop(Value::Int);
+  context.push(context.arrays.alloc(size->asInt));
+}
+
+void BasicBuiltin::print(Executor::Context &context)
 {
   unsigned int level = 0;
   Stack<Value> args;
   do
   {
-    Value v = stack.top();
-    stack.pop();
+    Value v = context.pop();
     if (v.type() == Value::TupClose)
       level++;
     else if (v.type() == Value::TupOpen)
@@ -46,37 +54,37 @@ void BasicBuiltin::print(Stack<Value> &stack)
     args.pop();
     switch (v.type())
     {
-      case Value::Int: cout.printf("%d", v->intval); break;
-      case Value::Real: cout.printf("%lf", v->realval); break;
-      case Value::Bool: cout.printf("%s", v->boolval? "true": "false"); break;
-      case Value::String: cout.printf("%s", m_strings->str(v->strval)); break;
+      case Value::Int: cout.printf("%d", v->asInt); break;
+      case Value::Real: cout.printf("%lf", v->asReal); break;
+      case Value::Bool: cout.printf("%s", v->asBool? "true": "false"); break;
+      case Value::String: cout.printf("%s", m_strings->str(v->asHandle)); break;
       default: break;
     }
     cout.printf(" ");
   }
 
   // Void return
-  stack.push(Value::TupOpen);
-  stack.push(Value::TupClose);
+  context.stack.push(Value::TupOpen);
+  context.stack.push(Value::TupClose);
 }
 
-void BasicBuiltin::println(Stack<Value> &stack)
+void BasicBuiltin::println(Executor::Context &context)
 {
-  print(stack);
+  print(context);
   cout.printf("\n");
 }
 
-void BasicBuiltin::stackTrace(Stack<Value> &stack)
+void BasicBuiltin::stackTrace(Executor::Context &context)
 {
-  for (size_t i=0; i<stack.size(); i++)
+  for (size_t i=0; i<context.stack.size(); i++)
   {
-    const Value &v = stack[i];
+    const Value &v = context.stack[i];
     switch (v.type())
     {
-      case Value::Int: cout.printf("%d", v->intval); break;
-      case Value::Real: cout.printf("%lf", v->realval); break;
-      case Value::Bool: cout.printf("%s", v->boolval? "true": "false"); break;
-      case Value::String: cout.printf("%s", m_strings->str(v->strval)); break;
+      case Value::Int: cout.printf("%d", v->asInt); break;
+      case Value::Real: cout.printf("%lf", v->asReal); break;
+      case Value::Bool: cout.printf("%s", v->asBool? "true": "false"); break;
+      case Value::String: cout.printf("%s", m_strings->str(v->asHandle)); break;
       case Value::TupOpen: cout.printf("["); break;
       case Value::TupClose: cout.printf("]"); break;
       default: break;

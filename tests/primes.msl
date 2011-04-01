@@ -17,7 +17,7 @@ fun isPrime X
 end
 
 fun main []
-  Max = 100
+  Max = 1000
   do println ["Primes up to", Max]
   do listPrimes Max
 end

@@ -1,5 +1,5 @@
 #ifndef EXECUTOR_H
-#define EXECUTOR_h
+#define EXECUTOR_H
 
 #include "Stack.h"
 #include "Map.h"
@@ -7,7 +7,9 @@
 #include "StringTable.h"
 #include "Value.h"
 #include "Scope.h"
-#include "Builtin.h"
+#include "ArrayStorage.h"
+
+class AbstractBuiltin;
 
 class Executor
 {
@@ -15,13 +17,7 @@ class Executor
     class Exception
     {
       public:
-        enum Type
-        {
-          BadType,
-          Trap,
-          UndefVar,
-          UndefFun
-        };
+        enum Type { BadType, Trap, UndefVar, UndefFun };
 
         Exception(Type type, size_t addr)
           : m_type(type), m_addr(addr) {}
@@ -34,6 +30,28 @@ class Executor
           size_t m_addr;
     };
 
+    struct Context
+    {
+      class BadType {};
+
+      // Stack operations
+      void push(const Value &v);
+      Value pop();
+      Value pop(Value::Type t);
+      void popdelete();
+
+      // Variable referencing
+      Value getVar(unsigned int name);
+      void setVar(unsigned int name, const Value &val);
+
+      void openScope();
+      void closeScope();
+
+      Stack<Value> stack;
+      Stack<Scope> scope;
+      ArrayStorage arrays;
+    };
+
     Executor(Program &program, StringTable *strings)
       : m_prog(program), m_strings(strings),
         m_pc(0), m_stopped(true) {}
@@ -42,21 +60,16 @@ class Executor
     void run(unsigned int entryFun);
 
   private:
-    void push(const Value &v);
-    Value pop();
-    Value pop(Value::Type t);
-    void popdelete();
-
-    Value getVariable(unsigned int name);
-    void setVariable(unsigned int name, const Value &val);
-
+    // Branching
     void call(unsigned int name, bool saveRet=true);
     void jump(size_t addr);
     void ret();
 
+    // Exceptions
     void trap();
     void badType();
 
+    // One-cycle execution
     void exec(const Instruction &instr);
     Value execPush(const Instruction &instr);
     Value execBinOp(const Instruction &instr, 
@@ -68,9 +81,8 @@ class Executor
     size_t m_pc;
     bool m_stopped;
     Stack<size_t> m_callStack;
-    Stack<Value> m_valStack;
-    Stack<Scope> m_scope;
     Vector<AbstractBuiltin *> m_builtins;
+    Context m_context;
 };
 
 #endif // EXECUTOR_H

@@ -1,36 +1,40 @@
 #include <cstddef>
 #include "Executor.h"
+#include "Builtin.h"
 #include "File.h"
 
 void Executor::exec(const Instruction &instr)
 {
   if (instr.isPush())
-    push(execPush(instr));
+    m_context.push(execPush(instr));
   else if (instr.isBinOp())
   {
-    Value right = pop();
-    Value left = pop();
-    push(execBinOp(instr, left, right));
+    Value right = m_context.pop();
+    Value left = m_context.pop();
+    m_context.push(execBinOp(instr, left, right));
   }
   else switch (instr.opcode)
   {
       // Pop from stack
     case Instruction::PopVar:
-      setVariable(instr.arg.atom, pop());
+      m_context.setVar(instr.arg.atom, m_context.pop());
       break;
     case Instruction::PopArrayItem:
-      trap(); // STUB
-      break;
+    {
+      Value index = m_context.pop(Value::Int);
+      Value val = m_context.pop();
+      m_context.arrays.set(m_context.getVar(instr.arg.atom), index, val);
+    } break;
     case Instruction::PopDelete:
-      popdelete();
+      m_context.popdelete();
       break;
 
       // Tuple boundaries
     case Instruction::TupUnOpen:
-      pop(Value::TupOpen);
+      m_context.pop(Value::TupOpen);
       break;
     case Instruction::TupUnClose:
-      pop(Value::TupClose);
+      m_context.pop(Value::TupClose);
       break;
 
       // Jumps
@@ -38,7 +42,7 @@ void Executor::exec(const Instruction &instr)
       jump(instr.arg.addr);
       break;
     case Instruction::JumpIfNot:
-      if (!pop(Value::Bool)->boolval)
+      if (!m_context.pop(Value::Bool)->asBool)
         jump(instr.arg.addr);
       break;
     case Instruction::Call:
@@ -62,13 +66,16 @@ Value Executor::execPush(const Instruction &instr)
 {
   switch (instr.opcode) 
   {
-    case Instruction::PushVar:       return getVariable(instr.arg.atom);
+    case Instruction::PushVar:       return m_context.getVar(instr.arg.atom);
     case Instruction::PushInt:       return instr.arg.intval;
     case Instruction::PushReal:      return instr.arg.realval;
     case Instruction::PushBool:      return instr.arg.boolval;
-    case Instruction::PushString:    return instr.arg.atom;
-    case Instruction::PushArrayItem: trap(); // STUB
-    case Instruction::Dup:           return m_valStack.top();
+    case Instruction::PushString:    return Value(Value::String, instr.arg.atom);
+    case Instruction::PushArrayItem: 
+                                     return m_context.arrays.get(
+                                         m_context.getVar(instr.arg.atom), 
+                                         m_context.pop(Value::Int));
+    case Instruction::Dup:           return m_context.stack.top();
     case Instruction::TupOpen:       return Value::TupOpen;
     case Instruction::TupClose:      return Value::TupClose;
     default:                         trap(); return 0;
@@ -96,29 +103,27 @@ Value Executor::execBinOp(const Instruction &instr,
   }
 }
 
-// ======== Helpers ========
+// ======== Context ========
 
-void Executor::push(const Value &v)
+void Executor::Context::push(const Value &v)
 {
-  m_valStack.push(v);
+  stack.push(v);
 }
 
-Value Executor::pop()
+Value Executor::Context::pop()
 {
-  Value v = m_valStack.top();
-  if (v.type() == Value::TupOpen || v.type() == Value::TupClose)
-    badType();
-  m_valStack.pop();
+  Value v = stack.top();
+  stack.pop();
   return v;
 }
 
-void Executor::popdelete()
+void Executor::Context::popdelete()
 {
   unsigned int level = 0;
   do
   {
-    Value v = m_valStack.top();
-    m_valStack.pop();
+    Value v = stack.top();
+    stack.pop();
     if (v.type() == Value::TupClose)
       level++;
     else if (v.type() == Value::TupOpen)
@@ -126,23 +131,40 @@ void Executor::popdelete()
   } while (level>0);
 }
 
-Value Executor::pop(Value::Type type)
+Value Executor::Context::pop(Value::Type type)
 {
-  Value v = m_valStack.top();
+  Value v = stack.top();
   if (v.type() != type)
-    badType();
-  m_valStack.pop();
+    throw BadType();
+  stack.pop();
   return v;
 }
+
+Value Executor::Context::getVar(unsigned int name)
+{
+  return scope.top().getVar(name);
+}
+
+void Executor::Context::setVar(unsigned int name, const Value &val)
+{
+  return scope.top().setVar(name, val);
+}
+
+void Executor::Context::openScope()
+{
+  scope.push(Scope());
+}
+
+void Executor::Context::closeScope()
+{
+  scope.pop();
+}
+
+// ========================================
 
 void Executor::trap()
 {
   throw Exception(Exception::Trap, m_pc);
-}
-
-void Executor::badType()
-{
-  throw Exception(Exception::BadType, m_pc);
 }
 
 void Executor::jump(size_t addr)
@@ -150,30 +172,6 @@ void Executor::jump(size_t addr)
   m_pc = addr-1; // Will be incremented automatically
 }
 
-Value Executor::getVariable(unsigned int name)
-{
-  return m_scope.top().getVar(name);
-}
-
-void Executor::setVariable(unsigned int name, const Value &val)
-{
-#if 0
-  const char *s_name = m_strings->str(name);
-  switch (val.type())
-  {
-    case Value::Int:    cerr.printf("@%04zu: %s <- %d\n", 
-                            m_pc, s_name, val->intval); break;
-    case Value::Real:   cerr.printf("@%04zu: %s <- %lf\n", 
-                            m_pc, s_name, val->realval); break;
-    case Value::Bool:   cerr.printf("@%04zu: %s <- %s\n", 
-                            m_pc, s_name, val->boolval? "TRUE" : "FALSE"); break;
-    case Value::String: cerr.printf("@%04zu: %s <- %u\n", 
-                            m_pc, s_name, val->strval); break;
-    default: break;
-  };
-#endif
-  return m_scope.top().setVar(name, val);
-}
 
 void Executor::call(unsigned int name, bool saveRet)
 {
@@ -183,7 +181,7 @@ void Executor::call(unsigned int name, bool saveRet)
 
   // Builtin
   for (size_t i=0; i<m_builtins.size(); i++)
-    if (m_builtins[i]->call(name, m_valStack))
+    if (m_builtins[i]->call(name, m_context))
       return;
 
   // Declared
@@ -193,7 +191,7 @@ void Executor::call(unsigned int name, bool saveRet)
       // Do call
       if (saveRet)
         m_callStack.push(m_pc);
-      m_scope.push(Scope()); // Open new variable scope
+      m_context.openScope(); // Open new variable scope
       jump(m_prog.entry(i).addr);
       return;
     }
@@ -207,7 +205,7 @@ void Executor::ret()
 #if 0
     cerr.printf("ret: @%04zu -> @%04zu\n", m_pc, m_callStack.top());
 #endif
-    m_scope.pop(); // Close the variable scope
+    m_context.closeScope(); // Close the variable scope
     jump(m_callStack.top()+1);
     m_callStack.pop();
   }
@@ -219,8 +217,8 @@ void Executor::run(unsigned int entryFun)
 {
   try
   {
-    push(Value::TupOpen);
-    push(Value::TupClose);
+    m_context.push(Value::TupOpen);
+    m_context.push(Value::TupClose);
     call(entryFun, false);
     m_pc++;
     m_stopped = false;
@@ -228,7 +226,7 @@ void Executor::run(unsigned int entryFun)
       step();
 
     // Remove function result from stack
-    popdelete();
+    m_context.popdelete();
   }
   catch (Value::TypeMismatch)
   {
