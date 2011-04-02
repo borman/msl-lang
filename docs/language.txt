@@ -1,0 +1,42 @@
+Digit ::= [0-9]
+SmallLetter ::= [a-z]
+CapitalLetter ::= [A-Z]
+TokenSymbol ::= <SmallLetter> | <CapitalLetter> | <Digit> | _
+
+Literal ::= "{<AnySymbol>*}"
+Integer ::= {~}<Digit>*
+Real ::= {~}{<Digit>*}.<Digit>*
+<Operation> ::= [=<>+-*/%]|and|or
+
+FName ::= <SmallLetter>{<TokenSymbol>*}
+VName ::= <CapitalLetter>{<TokenSymbol>*}
+AName ::= $<VName>
+
+SExpr ::= <Integer>
+        | <Real>
+        | <Literal>
+        | <VName>
+        | <FName> <SExpr>
+        | <AName> <SExpr>
+        | (<Expr>)
+        | [<Expr>{, <Expr>}*]
+        | if <Expr> then <Expr> else <Expr>
+
+Expr ::= <SExpr>
+       | <Expr><Operation><Expr>
+
+LExpr ::= <VName>
+        | <AName> <SExpr>
+        | [<LExpr>{, <LExpr>}*]
+
+Operator ::= do <Expr>
+           | if <Expr> then <Block>{ else <Block> }
+           | for <VName> from <Expr> to <Expr> <Block>
+           | while <Expr> <Block>
+           | <LExpr> = <Expr>
+
+Block ::= <Operator>* end
+
+Function ::= fun <FName> <LExpr> <Block>
+
+Program ::= Function*
