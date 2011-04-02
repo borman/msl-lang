@@ -19,12 +19,12 @@ void Compiler::compileFun(Fun *fun)
   m_prog.addEntry(Program::EntryPoint(fun->name(), m_prog.nextAddr()));
 
   // Load & bind argument
-  compilePopExpr(fun->arg());
+  compilePop(fun->arg());
 
   compileBlock(fun->body());
 
   // "noreturn" exit
-  // TODO: Do not generate if return guaranteed 
+  // FIXME: Do not generate if return guaranteed 
   emit(Instruction::TupOpen);
   emit(Instruction::TupClose);
   emit(Instruction::Return);
@@ -60,26 +60,26 @@ void Compiler::compileOperator(Operator *op)
 
 void Compiler::compileDo(Do *ast)
 {
-  compilePushExpr(ast->expr());
+  compilePush(ast->expr());
   // Discard expression result
   emit(Instruction::PopDelete);
 }
 
 void Compiler::compileReturn(Return *ast)
 {
-  compilePushExpr(ast->expr());
+  compilePush(ast->expr());
   emit(Instruction::Return);
 }
 
 void Compiler::compileLet(Let *ast)
 {
-  compilePushExpr(ast->rvalue());
-  compilePopExpr(ast->lvalue());
+  compilePush(ast->rvalue());
+  compilePop(ast->lvalue());
 }
 
 void Compiler::compileIf(If *ast)
 {
-  compilePushExpr(ast->condition());
+  compilePush(ast->condition());
   // JNOT @ELSE
   size_t j_else = emit(Instruction::JumpIfNot);
   compileBlock(ast->positive());
@@ -103,7 +103,7 @@ void Compiler::compileWhile(While *ast)
 {
   // @LOOP:
   size_t l_loop = m_prog.nextAddr();
-  compilePushExpr(ast->condition());
+  compilePush(ast->condition());
   // JNOT @EXIT
   size_t j_exit = emit(Instruction::JumpIfNot);
   compileBlock(ast->body());
@@ -116,33 +116,33 @@ void Compiler::compileWhile(While *ast)
 void Compiler::compileFor(For *ast)
 {
   // Prologue
-  compilePushExpr(ast->from());
-  compilePopVariable(ast->var());
+  compilePush(ast->from());
+  compilePop(ast->var());
 
   // Test
   size_t l_loop = m_prog.nextAddr();
-  compilePushExpr(ast->to());
-  compilePushVariable(ast->var());
+  compilePush(ast->to());
+  compilePush(ast->var());
   emit(Instruction::TestGreaterEqual);
   size_t j_exit = emit(Instruction::JumpIfNot); // jump @exit
 
   // Body
   compileBlock(ast->body());
-  compilePushVariable(ast->var());
+  compilePush(ast->var());
   emit(Instruction::PushInt, 1);
   emit(Instruction::Add);
-  compilePopVariable(ast->var());
+  compilePop(ast->var());
   emit(Instruction::Jump, l_loop);
 
   //@exit:
   m_prog[j_exit].arg.addr = m_prog.nextAddr();
 }
 
-void Compiler::compilePushExpr(Expression *expr)
+void Compiler::compilePush(Expression *expr)
 {
   switch (expr->type())
   {
-#define EXPR(type) case Base::type: compilePush##type(expr->as<type>()); break
+#define EXPR(type) case Base::type: compilePush(expr->as<type>()); break
     EXPR(Int);
     EXPR(Bool);
     EXPR(Real);
@@ -162,73 +162,73 @@ void Compiler::compilePushExpr(Expression *expr)
 
 // ============ Trivial typed constants
 
-void Compiler::compilePushInt(Int *expr)
+void Compiler::compilePush(Int *expr)
 {
   emit(Instruction::PushInt, expr->value());
 }
 
-void Compiler::compilePushReal(Real *expr)
+void Compiler::compilePush(Real *expr)
 {
   emit(Instruction::PushReal, expr->value());
 }
 
-void Compiler::compilePushBool(Bool *expr)
+void Compiler::compilePush(Bool *expr)
 {
   emit(Instruction::PushBool, expr->value());
 }
 
-void Compiler::compilePushLiteral(Literal *expr)
+void Compiler::compilePush(Literal *expr)
 {
   emit(Instruction::PushString, expr->value());
 }
 
-void Compiler::compilePushVariable(Variable *expr)
+void Compiler::compilePush(Variable *expr)
 {
   emit(Instruction::PushVar, expr->name());
 }
 
 // ============
 
-void Compiler::compilePushFuncCall(FuncCall *expr)
+void Compiler::compilePush(FuncCall *expr)
 {
-  compilePushExpr(expr->arg());
+  compilePush(expr->arg());
   emit(Instruction::Call, expr->name());
 }
 
-void Compiler::compilePushArrayItem(ArrayItem *expr)
+void Compiler::compilePush(ArrayItem *expr)
 {
-  compilePushExpr(expr->arg());
+  compilePush(expr->arg());
   emit(Instruction::PushArrayItem, expr->name());
 }
 
-void Compiler::compilePushTuple(Tuple *expr)
+void Compiler::compilePush(Tuple *expr)
 {
   emit(Instruction::TupOpen);
   Expression *contents = expr->contents();
   while (contents != NULL)
   {
-    compilePushExpr(contents);
+    compilePush(contents);
     contents = contents->next<Expression>();
   }
   emit(Instruction::TupClose);
 }
 
-void Compiler::compilePushSelector(Selector *expr)
+void Compiler::compilePush(Selector *expr)
 {
-  compilePushExpr(expr->condition());
+  compilePush(expr->condition());
 
   // JNOT @ELSE
   size_t j_else = emit(Instruction::JumpIfNot);
 
   // then ...
-  compilePushExpr(expr->positive());
+  compilePush(expr->positive());
   // JUMP @EXIT
   size_t j_exit = emit(Instruction::Jump);
 
   // @ELSE:
   m_prog[j_else].arg.addr = m_prog.nextAddr();
   // else ...
-  compilePushExpr(expr->negative());
+  compilePush(expr->negative());
 
   // @EXIT:
   m_prog[j_exit].arg.addr = m_prog.nextAddr();
@@ -252,25 +252,25 @@ static Instruction::Opcode infixInstr(Infix::Subtype t)
   return Instruction::Trap;
 }
 
-void Compiler::compilePushInfix(Infix *expr)
+void Compiler::compilePush(Infix *expr)
 {
-  compilePushExpr(expr->left());
-  compilePushExpr(expr->right());
+  compilePush(expr->left());
+  compilePush(expr->right());
   emit(infixInstr(expr->subtype()));
 }
 
-void Compiler::compilePopExpr(Expression *expr)
+void Compiler::compilePop(Expression *expr)
 {
   switch (expr->type())
   {
     case Base::Variable:
-      compilePopVariable(expr->as<Variable>());
+      compilePop(expr->as<Variable>());
       break;
     case Base::ArrayItem:
-      compilePopArrayItem(expr->as<ArrayItem>());
+      compilePop(expr->as<ArrayItem>());
       break;
     case Base::Tuple:
-      compilePopTuple(expr->as<Tuple>());
+      compilePop(expr->as<Tuple>());
       break;
 
     default:
@@ -278,18 +278,18 @@ void Compiler::compilePopExpr(Expression *expr)
   }
 }
 
-void Compiler::compilePopVariable(Variable *expr)
+void Compiler::compilePop(Variable *expr)
 {
   emit(Instruction::PopVar, expr->name());
 }
 
-void Compiler::compilePopArrayItem(ArrayItem *expr)
+void Compiler::compilePop(ArrayItem *expr)
 {
-  compilePushExpr(expr->arg());
+  compilePush(expr->arg());
   emit(Instruction::PopArrayItem, expr->name());
 }
 
-void Compiler::compilePopTuple(Tuple *expr)
+void Compiler::compilePop(Tuple *expr)
 {
   emit(Instruction::TupUnClose);
   // Reverse contents
@@ -298,7 +298,7 @@ void Compiler::compilePopTuple(Tuple *expr)
     contents.push(e);
   while (!contents.empty())
   {
-    compilePopExpr(contents.top());
+    compilePop(contents.top());
     contents.pop();
   }
   emit(Instruction::TupUnOpen);

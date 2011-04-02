@@ -27,23 +27,23 @@ class Compiler
     void compileFor(AST::For *ast);
 
     // Push-Expressions 
-    void compilePushExpr(AST::Expression *expr);
-    void compilePushInt(AST::Int *expr);
-    void compilePushReal(AST::Real *expr);
-    void compilePushBool(AST::Bool *expr);
-    void compilePushLiteral(AST::Literal *expr);
-    void compilePushVariable(AST::Variable *expr);
-    void compilePushFuncCall(AST::FuncCall *expr);
-    void compilePushArrayItem(AST::ArrayItem *expr);
-    void compilePushTuple(AST::Tuple *expr);
-    void compilePushSelector(AST::Selector *expr);
-    void compilePushInfix(AST::Infix *expr);
+    void compilePush(AST::Expression *expr);
+    void compilePush(AST::Int *expr);
+    void compilePush(AST::Real *expr);
+    void compilePush(AST::Bool *expr);
+    void compilePush(AST::Literal *expr);
+    void compilePush(AST::Variable *expr);
+    void compilePush(AST::FuncCall *expr);
+    void compilePush(AST::ArrayItem *expr);
+    void compilePush(AST::Tuple *expr);
+    void compilePush(AST::Selector *expr);
+    void compilePush(AST::Infix *expr);
     
     // Pop-Expressions
-    void compilePopExpr(AST::Expression *expr);
-    void compilePopVariable(AST::Variable *expr);
-    void compilePopArrayItem(AST::ArrayItem *expr);
-    void compilePopTuple(AST::Tuple *expr);
+    void compilePop(AST::Expression *expr);
+    void compilePop(AST::Variable *expr);
+    void compilePop(AST::ArrayItem *expr);
+    void compilePop(AST::Tuple *expr);
 
     
     template<class T> 
