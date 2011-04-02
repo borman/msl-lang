@@ -12,23 +12,45 @@ class AbstractBuiltin
     virtual bool call(unsigned int name, Executor::Context &context) = 0;
 };
 
-class BasicBuiltin: public AbstractBuiltin
+class ListedBuiltin: public AbstractBuiltin
 {
   public:
-    BasicBuiltin(StringTable *strings);
+    typedef void (*Function)(Executor::Context &context);
+    struct Definition
+    {
+      const char *name;
+      Function func;
+    };
+
+    ListedBuiltin(StringTable *strings, const Definition *defs, size_t count);
+    ~ListedBuiltin();
+
     virtual bool call(unsigned int name, Executor::Context &context);
 
   private:
-    void array(Executor::Context &context);
-    void print(Executor::Context &context);
-    void println(Executor::Context &context);
-    void stackTrace(Executor::Context &context);
+    struct Binding
+    {
+      unsigned int name;
+      Function func;
+    };
 
-    unsigned int m_arrayId;
-    unsigned int m_printId;
-    unsigned int m_printlnId;
-    unsigned int m_stackTraceId;
-    StringTable *m_strings;
+    Binding *m_bindings;
+    size_t m_bindingCount;
+};
+
+class BasicBuiltin: public ListedBuiltin
+{
+  public:
+    BasicBuiltin(StringTable *strings);
+
+  private:
+    static void array(Executor::Context &context);
+    static void size(Executor::Context &context);
+    static void print(Executor::Context &context);
+    static void println(Executor::Context &context);
+    static void stackTrace(Executor::Context &context);
+
+    static const ListedBuiltin::Definition defs[];
 };
 
 #endif // BUILTIN_H

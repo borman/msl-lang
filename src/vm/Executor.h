@@ -50,11 +50,10 @@ class Executor
       Stack<Value> stack;
       Stack<Scope> scope;
       ArrayStorage arrays;
+      StringTable *strings;
     };
 
-    Executor(Program &program, StringTable *strings)
-      : m_prog(program), m_strings(strings),
-        m_pc(0), m_stopped(true) {}
+    Executor(Program &program, StringTable *strings);
 
     void addBuiltin(AbstractBuiltin *b);
     void run(unsigned int entryFun);
@@ -77,7 +76,6 @@ class Executor
     void step();
 
     Program &m_prog;
-    StringTable *m_strings;
     size_t m_pc;
     bool m_stopped;
     Stack<size_t> m_callStack;

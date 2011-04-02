@@ -1,36 +1,57 @@
 #include "Builtin.h"
 #include "File.h"
 
+ListedBuiltin::ListedBuiltin(StringTable *strings, const Definition *defs, size_t count)
+  : m_bindings(new Binding[count]), m_bindingCount(count)
+{
+  for (size_t i=0; i<count; i++)
+  {
+    m_bindings[i].name = strings->id(defs[i].name);
+    m_bindings[i].func = defs[i].func;
+  }
+}
+
+ListedBuiltin::~ListedBuiltin()
+{
+  delete[] m_bindings;
+}
+
+bool ListedBuiltin::call(unsigned int name, Executor::Context &context)
+{
+  for (size_t i=0; i<m_bindingCount; i++)
+    if (name == m_bindings[i].name)
+    {
+      m_bindings[i].func(context);
+      return true;
+    }
+  return false;
+}
+
+// =============== Basic
+
+const ListedBuiltin::Definition BasicBuiltin::defs[] =
+{
+  {"array", BasicBuiltin::array},
+  {"size", BasicBuiltin::size},
+  {"print", BasicBuiltin::print},
+  {"println", BasicBuiltin::println},
+};
 
 BasicBuiltin::BasicBuiltin(StringTable *strings)
-  : m_strings(strings)
+  : ListedBuiltin(strings, defs, sizeof(defs)/sizeof(ListedBuiltin::Definition))
 {
-  m_arrayId = strings->id("array");
-  m_printId = strings->id("print");
-  m_printlnId = strings->id("println");
-  m_stackTraceId = strings->id("stackTrace");
 }
-
-bool BasicBuiltin::call(unsigned int name, Executor::Context &context)
-{
-  if (name==m_arrayId)
-    array(context);
-  else if (name==m_printId)
-    print(context);
-  else if (name == m_printlnId)
-    println(context);
-  else if (name == m_stackTraceId)
-    stackTrace(context);
-  else
-    return false;
-  return true;
-}
-
 
 void BasicBuiltin::array(Executor::Context &context)
 {
   Value size = context.pop(Value::Int);
   context.push(context.arrays.alloc(size->asInt));
+}
+
+void BasicBuiltin::size(Executor::Context &context)
+{
+  Value array = context.pop(Value::Array);
+  context.push(static_cast<int>(context.arrays.getArray(array)->size()));
 }
 
 void BasicBuiltin::print(Executor::Context &context)
@@ -54,11 +75,20 @@ void BasicBuiltin::print(Executor::Context &context)
     args.pop();
     switch (v.type())
     {
-      case Value::Int: cout.printf("%d", v->asInt); break;
-      case Value::Real: cout.printf("%lf", v->asReal); break;
-      case Value::Bool: cout.printf("%s", v->asBool? "true": "false"); break;
-      case Value::String: cout.printf("%s", m_strings->str(v->asHandle)); break;
-      default: break;
+      case Value::Int: 
+        cout.printf("%d", v->asInt); 
+        break; 
+      case Value::Real: 
+        cout.printf("%lf", v->asReal); 
+        break;
+      case Value::Bool: 
+        cout.printf("%s", v->asBool? "true": "false"); 
+        break;
+      case Value::String: 
+        cout.printf("%s", context.strings->str(v->asHandle)); 
+        break;
+      default: 
+        break;
     }
     cout.printf(" ");
   }
@@ -84,7 +114,7 @@ void BasicBuiltin::stackTrace(Executor::Context &context)
       case Value::Int: cout.printf("%d", v->asInt); break;
       case Value::Real: cout.printf("%lf", v->asReal); break;
       case Value::Bool: cout.printf("%s", v->asBool? "true": "false"); break;
-      case Value::String: cout.printf("%s", m_strings->str(v->asHandle)); break;
+      case Value::String: cout.printf("%s", context.strings->str(v->asHandle)); break;
       case Value::TupOpen: cout.printf("["); break;
       case Value::TupClose: cout.printf("]"); break;
       default: break;

@@ -53,6 +53,12 @@ Value ArrayStorage::get(const Value &ref, const Value &index) const
   return (*m_arrays[ref->asHandle])[index->asInt-1];
 }
 
+Vector<Value> *ArrayStorage::getArray(const Value &ref)
+{
+  checkRef(ref);
+  return m_arrays[ref->asHandle];
+}
+
 void ArrayStorage::checkRef(const Value &ref) const
 {
   if (ref.type() != Value::Array

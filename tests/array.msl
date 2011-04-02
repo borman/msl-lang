@@ -22,6 +22,7 @@ end
 fun main []
   N = 30
   Test = array N
+  do println ["Sizeof Test is", size Test]
 
   T = 7
   for I from 1 to N

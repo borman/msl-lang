@@ -3,6 +3,12 @@
 #include "Builtin.h"
 #include "File.h"
 
+Executor::Executor(Program &program, StringTable *strings)
+  : m_prog(program), m_pc(0), m_stopped(true) 
+{
+  m_context.strings = strings;
+}
+
 void Executor::exec(const Instruction &instr)
 {
   if (instr.isPush())
@@ -175,10 +181,6 @@ void Executor::jump(size_t addr)
 
 void Executor::call(unsigned int name, bool saveRet)
 {
-#if 0
-  cerr.printf("call %s\n", m_strings->str(name));
-#endif
-
   // Builtin
   for (size_t i=0; i<m_builtins.size(); i++)
     if (m_builtins[i]->call(name, m_context))
@@ -202,9 +204,6 @@ void Executor::ret()
 {
   if (!m_callStack.empty())
   {
-#if 0
-    cerr.printf("ret: @%04zu -> @%04zu\n", m_pc, m_callStack.top());
-#endif
     m_context.closeScope(); // Close the variable scope
     jump(m_callStack.top()+1);
     m_callStack.pop();

@@ -21,6 +21,8 @@ class ArrayStorage
     void set(const Value &ref, const Value &index, const Value &val);
     Value get(const Value &ref, const Value &index) const;
 
+    Vector<Value> *getArray(const Value &ref);
+
   private:
     void checkRef(const Value &ref) const;
     void checkIndex(const Value &ref, const Value &index) const;
