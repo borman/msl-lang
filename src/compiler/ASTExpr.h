@@ -15,62 +15,26 @@ namespace AST
   };
 
   // ===== Constants
-
-  class Literal: public Expression
+  
+  template<class Value, Base::Type Tag>
+  class Constant: public Expression
   {
     public:
-      static const Base::Type m_class_type = Base::Literal;
+      static const Base::Type m_class_type = Tag;
 
-      Literal(const Atom &s, const TextRegion &r = TextRegion())
-        : Expression(m_class_type, r), 
-          m_text(s) {} 
-
-      Atom text() const { return m_text; }
-    private:
-      Atom m_text;
-  };
-
-  class Int: public Expression
-  {
-    public:
-      static const Base::Type m_class_type = Base::Int;
-
-      Int(int v, const TextRegion &r = TextRegion())
+      Constant(Value v, const TextRegion &r = TextRegion())
         : Expression(m_class_type, r), 
           m_value(v) {} 
 
-      int value() const { return m_value; }
+      Value value() const { return m_value; }
     private:
-      int m_value;
+      Value m_value;
   };
 
-  class Real: public Expression
-  {
-    public:
-      static const Base::Type m_class_type = Base::Real;
-
-      Real(double v, const TextRegion &r = TextRegion())
-        : Expression(m_class_type, r), 
-          m_value(v) {} 
-
-      double value() const { return m_value; }
-    private:
-      double m_value;
-  };
-
-  class Bool: public Expression
-  {
-    public:
-      static const Base::Type m_class_type = Base::Bool;
-
-      Bool(bool v, const TextRegion &r = TextRegion())
-        : Expression(m_class_type, r), 
-          m_value(v) {} 
-
-      bool value() const { return m_value; }
-    private:
-      bool m_value;
-  };
+  typedef Constant<Atom, Base::Literal> Literal;
+  typedef Constant<int, Base::Int> Int;
+  typedef Constant<double, Base::Real> Real;
+  typedef Constant<bool, Base::Bool> Bool;
 
   // ===== Complex AST items
 
@@ -88,41 +52,27 @@ namespace AST
       Atom m_name;
   };
 
-  class FuncCall: public Expression
+  template<Base::Type Tag>
+  class Unary: public Expression
   {
     public:
-      static const Base::Type m_class_type = Base::FuncCall;
+      static const Base::Type m_class_type = Tag;
 
-      FuncCall(const Atom &name, Expression *arg, const TextRegion &r = TextRegion())
+      Unary(const Atom &name, Expression *arg, const TextRegion &r = TextRegion())
         : Expression(m_class_type, r), 
           m_name(name), m_arg(arg) {} 
 
       Atom name() const { return m_name; }
       Expression *arg() const { return m_arg; }
 
-      void bind(Expression *arg) { m_arg=arg; }
+      void bind(Expression *arg) { m_arg = arg; }
     private:
       Atom m_name;
       Expression *m_arg;
   };
 
-  class ArrayItem: public Expression
-  {
-    public:
-      static const Base::Type m_class_type = Base::ArrayItem;
-
-      ArrayItem(const Atom &name, Expression *arg, const TextRegion &r = TextRegion())
-        : Expression(m_class_type, r),
-          m_name(name), m_arg(arg) {} 
-
-      Atom name() const { return m_name; }
-      Expression *arg() const { return m_arg; }
-
-      void bind(Expression *arg) { m_arg=arg; }
-    private:
-      Atom m_name;
-      Expression *m_arg;
-  };
+  typedef Unary<Base::FuncCall> FuncCall;
+  typedef Unary<Base::ArrayItem> ArrayItem;
 
   class Tuple: public Expression
   {

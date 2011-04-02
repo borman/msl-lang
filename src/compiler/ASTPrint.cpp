@@ -57,7 +57,7 @@ void AST::printTokens(File *dest, Base *tokens)
         break;
 
       case Base::Literal:
-        dest->printf("LIT  %s", t->as<Literal>()->text().c_str());
+        dest->printf("LIT  %s", t->as<Literal>()->value().c_str());
         break;
 
       case Base::FuncCall:
@@ -135,7 +135,7 @@ void AST::printTree(File *dest, Base *ast, unsigned int n_indent, bool do_indent
       dest->printf("%s%s", pos, ast->as<Bool>()->value()? "true" : "false");
       break;
     case Base::Literal:
-      dest->printf("%s\"%s\"", pos, ast->as<Literal>()->text().c_str());
+      dest->printf("%s\"%s\"", pos, ast->as<Literal>()->value().c_str());
       break;
     case Base::Variable:
       dest->printf("%s'%s", pos, ast->as<Variable>()->name().c_str());

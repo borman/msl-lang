@@ -179,7 +179,7 @@ void Compiler::compilePushBool(Bool *expr)
 
 void Compiler::compilePushLiteral(Literal *expr)
 {
-  emit(Instruction::PushString, expr->text());
+  emit(Instruction::PushString, expr->value());
 }
 
 void Compiler::compilePushVariable(Variable *expr)
