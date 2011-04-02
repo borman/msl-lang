@@ -30,12 +30,10 @@ class Parser: public DataSource<AST::Fun *>
     AST::Fun *readFun();
     AST::Operator *readBlock();
     AST::Operator *readOperator();
-    AST::Operator *readOperatorDo();
     AST::Operator *readOperatorReturn();
     AST::Operator *readOperatorIf();
     AST::Operator *readOperatorFor();
     AST::Operator *readOperatorWhile();
-    AST::Operator *readOperatorLet();
     AST::Expression *readExpr();
     AST::Expression *readSExpr();
     AST::Expression *readSExprFuncCall();

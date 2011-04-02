@@ -1,10 +1,10 @@
 fun listPrimes Max
   for I from 2 to Max
     if isPrime I then
-      do print I
+      print I
     end 
   end
-  do println []
+  println []
 end
 
 fun isPrime X
@@ -17,7 +17,7 @@ fun isPrime X
 end
 
 fun main []
-  Max = 10000
-  do println ["Primes up to", Max]
-  do listPrimes Max
+  Max = 1000
+  println ["Primes up to", Max]
+  listPrimes Max
 end

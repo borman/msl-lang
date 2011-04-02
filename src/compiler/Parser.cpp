@@ -52,9 +52,7 @@ Operator *Parser::readBlock()
 // General case
 Operator *Parser::readOperator()
 {
-  if (nextIsSym(Symbol::Do))
-    return readOperatorDo();
-  else if (nextIsSym(Symbol::Return))
+  if (nextIsSym(Symbol::Return))
     return readOperatorReturn();
   else if (nextIsSym(Symbol::If))
     return readOperatorIf();
@@ -62,16 +60,24 @@ Operator *Parser::readOperator()
     return readOperatorFor();
   else if (nextIsSym(Symbol::While))
     return readOperatorWhile();
-  else // <LEXPR> = <EXPR>
-    return readOperatorLet();
-}
-
-// DO
-Operator *Parser::readOperatorDo()
-{
-  consumeSym(Symbol::Do);
-  SafePtr<Expression> expr(readExpr());
-  return new Do(expr);
+  else 
+  {
+    // LET or DO
+    SafePtr<Expression> expr(readSExpr());
+    if (nextIs(Base::Infix) && next<Infix>()->subtype() == Infix::Equals)
+    {
+      // LET
+      expectLValue(expr);
+      deleteNext();
+      SafePtr<Expression> rvalue(readExpr());
+      return new Let(expr, rvalue);
+    }
+    else
+    {
+      // DO
+      return new Do(expr);
+    }
+  }
 }
 
 // RETURN
@@ -119,16 +125,6 @@ Operator *Parser::readOperatorWhile()
   SafePtr<Expression> cond(readExpr());
   SafePtr<Operator> body(readBlock());
   return new While(cond, body);
-}
-
-// LET
-Operator *Parser::readOperatorLet()
-{
-  SafePtr<Expression> lvalue(readSExpr());
-  expectLValue(lvalue);
-  expectEqualSign();
-  SafePtr<Expression> rvalue(readExpr());
-  return new Let(lvalue, rvalue);
 }
 
 // ===== EXPRESSIONS

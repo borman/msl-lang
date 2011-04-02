@@ -29,11 +29,11 @@ LExpr ::= <VName>
         | <AName> <SExpr>
         | [<LExpr>{, <LExpr>}*]
 
-Operator ::= do <Expr>
-           | if <Expr> then <Block>{ else <Block> }
+Operator ::= if <Expr> then <Block>{ else <Block> }
            | for <VName> from <Expr> to <Expr> <Block>
            | while <Expr> <Block>
            | <LExpr> = <Expr>
+           | <SExpr>
 
 Block ::= <Operator>* end
 

@@ -7,13 +7,13 @@ fun sqr X
 end
 
 fun on_start []
-  do print ["Игра начинается, игроков: ", NPlayers]
+  print ["Игра начинается, игроков: ", NPlayers]
 end
 
 fun on_turn N
-  do print ["Ход номер ", N]
-  do buy [2, RawPrice]
-  do sell [production MyId, ProductionPrice]
+  print ["Ход номер ", N]
+  buy [2, RawPrice]
+  sell [production MyId, ProductionPrice]
   if N%2 = 1 then
     MinProd = 2
   end else
@@ -40,5 +40,5 @@ fun on_turn N
   Numbers = 2*3 - 4/5.0 + ~49
 
   ToProduce = min [2, raw MyId]
-  do produce ToProduce
+  produce ToProduce
 end

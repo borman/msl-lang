@@ -15,14 +15,14 @@ fun qsort [A, L, R]
       J = J-1
     end
   end
-  if J>L then do qsort [A, L, J] end
-  if I<R then do qsort [A, I, R] end
+  if J>L then qsort [A, L, J] end
+  if I<R then qsort [A, I, R] end
 end
 
 fun main []
   N = 30
   Test = array N
-  do println ["Sizeof Test is", size Test]
+  println ["Sizeof Test is", size Test]
 
   T = 7
   for I from 1 to N
@@ -30,7 +30,7 @@ fun main []
     T = (T*383) % 1543 + 1
   end
 
-  do println Test
-  do qsort [Test, 1, N]
-  do println Test
+  println Test
+  qsort [Test, 1, N]
+  println Test
 end

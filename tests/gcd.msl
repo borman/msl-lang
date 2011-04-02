@@ -20,9 +20,6 @@ end
 
 fun main []
   [A, B] = [7000, 7*9*543]
-  ;do println ["gcd", A, B, "=", gcd [A, B]]
-  ;do println ["gcd_rec", A, B, "=", gcd_rec [A, B]]
-  for I from 1 to 10000
-    do gcd_rec [A, B]
-  end
+  println ["gcd", A, B, "=", gcd [A, B]]
+  println ["gcd_rec", A, B, "=", gcd_rec [A, B]]
 end

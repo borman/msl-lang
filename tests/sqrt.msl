@@ -22,6 +22,6 @@ end
 
 fun main []
   for X from 1 to 20
-    do println ["sqrt", X, "=", sqrt X]
+    println ["sqrt", X, "=", sqrt X]
   end
 end
