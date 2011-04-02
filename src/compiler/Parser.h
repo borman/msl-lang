@@ -19,6 +19,15 @@ class Parser: public DataSource<AST::Fun *>
         const char *m_text;
         TextRegion m_region;
     };
+    class SymbolExpected: public Exception
+    {
+      public:
+        SymbolExpected(AST::Symbol::Subtype s, const TextRegion &region = TextRegion())
+          : Exception("Symbol", region), m_symbol(s) {}
+        AST::Symbol::Subtype symbol() const { return m_symbol; }
+      private:
+        AST::Symbol::Subtype m_symbol;
+    };
 
     Parser(DataSource<AST::Base *> *source): m_source(source), m_next(NULL) {}
     ~Parser() { delete m_next; }

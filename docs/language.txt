@@ -30,8 +30,8 @@ LExpr ::= <VName>
         | [<LExpr>{, <LExpr>}*]
 
 Operator ::= if <Expr> then <Block>{ else <Block> }
-           | for <VName> from <Expr> to <Expr> <Block>
-           | while <Expr> <Block>
+           | for <VName> from <Expr> to <Expr> do <Block>
+           | while <Expr> do <Block>
            | <LExpr> = <Expr>
            | <SExpr>
 

@@ -7,6 +7,7 @@
 #include "ASTPrint.h"
 #include "File.h"
 #include "FileCharSource.h"
+#include "Symbols.h"
 
 const char astFileName[] = "ast.lisp";
 const char asmFileName[] = "asm.lst";
@@ -51,10 +52,18 @@ int main()
            e.text(), e.token().c_str());
     return 1;
   }
+  catch (const Parser::SymbolExpected &e)
+  {
+    const TextRegion &r = e.region();
+    cout.printf("stdin:%u:%u-%u:%u: Parser error: '%s' expected\n", 
+        r.startRow+1, r.startCol+1, r.endRow+1, r.endCol+1,
+        Symbols::name(e.symbol()));
+    return 1;
+  }
   catch (const Parser::Exception &e)
   {
     const TextRegion &r = e.region();
-    cout.printf("stdin:%u:%u-%u:%u: Parser error: %s\n", 
+    cout.printf("stdin:%u:%u-%u:%u: Parser error: %s expected\n", 
         r.startRow+1, r.startCol+1, r.endRow+1, r.endCol+1,
         e.text());
     return 1;

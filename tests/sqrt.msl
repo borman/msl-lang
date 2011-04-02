@@ -9,7 +9,7 @@ end
 fun sqrt X
   L = 0.0
   R = real X
-  while R-L > 0.001
+  while R-L > 0.001 do
     T = (L+R)/2
     if T*T > X then
       R = T
@@ -21,7 +21,7 @@ fun sqrt X
 end
 
 fun main []
-  for X from 1 to 20
+  for X from 1 to 20 do
     println ["sqrt", X, "=", sqrt X]
   end
 end

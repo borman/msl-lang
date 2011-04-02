@@ -114,6 +114,7 @@ Operator *Parser::readOperatorFor()
   SafePtr<Expression> from(readExpr());
   consumeSym(Symbol::To);
   SafePtr<Expression> to(readExpr());
+  consumeSym(Symbol::Do);
   SafePtr<Operator> body(readBlock());
   return new For(var, from, to, body);
 }
@@ -123,6 +124,7 @@ Operator *Parser::readOperatorWhile()
 {
   consumeSym(Symbol::While);
   SafePtr<Expression> cond(readExpr());
+  consumeSym(Symbol::Do);
   SafePtr<Operator> body(readBlock());
   return new While(cond, body);
 }
@@ -162,7 +164,7 @@ Expression *Parser::readSExpr()
   else if (nextIsSym(Symbol::LBracket))
     return readSExprTuple();
   else 
-    throw Exception("Expression expected", next<Base>()->region());
+    throw Exception("Expression", next<Base>()->region());
 }
 
 // FUNCTION CALL
@@ -299,7 +301,7 @@ bool Parser::nextIsSym(Symbol::Subtype t)
 void Parser::consumeSym(Symbol::Subtype t)
 {
   if (!nextIsSym(t))
-    throw Exception("Symbol expectation failed", next<Base>()->region());
+    throw SymbolExpected(t, next<Base>()->region());
   else
     deleteNext();
 }
@@ -313,7 +315,7 @@ bool Parser::nextIs(Base::Type t)
 void Parser::expect(Base::Type t)
 {
   if (!nextIs(t))
-    throw Exception("Class expectation failed", next<Base>()->region());
+    throw Exception("Something better than that", next<Base>()->region());
 }
 
 void Parser::expectLValue(Expression *expr)
@@ -330,14 +332,6 @@ void Parser::expectLValue(Expression *expr)
     }
   }
   else
-    throw Exception("LValue expected", expr->region());
-}
-
-void Parser::expectEqualSign()
-{
-  if (nextIs(Base::Infix) && next<Infix>()->subtype() == Infix::Equals)
-    deleteNext();
-  else
-    throw Exception("Assignment operator expected", next<Base>()->region());
+    throw Exception("LValue", expr->region());
 }
 

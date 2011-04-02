@@ -3,7 +3,7 @@ fun gcd [A, B]
   if B > A then
     [A, B] = [B, A]
   end
-  while B > 0
+  while B > 0 do
     [A, B] = [B, A%B]
   end
   return A
