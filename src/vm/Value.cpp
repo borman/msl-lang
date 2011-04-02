@@ -15,24 +15,10 @@ double Value::toReal() const
   else throw TypeMismatch();
 }
 
-/*
-Value operator +(const Value &a, const Value &b) const
-{
-  if ((a.type() == Value::Int || a.type() == Value::Real)
-      && (b.type() == Value::Int || b.type() == Value::Real))
-  {
-    if (a.type() == Value::Int && b.type() == Value::Int)
-      return a.asInt() + b.asInt();
-    else
-      return (a.type() == Value::Int? double(a.asInt())   : d.asReal)
-         + (b.type() == Value::Int? double(b.asInt()) : v.a.asReal());
-  }
-  else 
-    throw Value::TypeMismatch();
-}
-*/
 
-#define VAL_OPERATOR(_OP) \
+// (int*int) -> int
+// (real*real) | (int*real) | (real*int) -> real
+#define VAL_NUM_OPERATOR(_OP) \
 Value operator _OP(const Value &a, const Value &b) \
 { \
   if ((a.type() == Value::Int || a.type() == Value::Real) \
@@ -47,12 +33,26 @@ Value operator _OP(const Value &a, const Value &b) \
     throw Value::TypeMismatch(); \
 } 
 
-VAL_OPERATOR(+)
-VAL_OPERATOR(-)
-VAL_OPERATOR(*)
-VAL_OPERATOR(/)
-VAL_OPERATOR(>)
-VAL_OPERATOR(<)
+// (a*a) -> a
+#define VAL_OPERATOR(_TYPE, _OP) \
+Value operator _OP(const Value &a, const Value &b) \
+{ \
+  if (a.type() == Value::_TYPE && b.type() == Value::_TYPE) \
+    return a.as##_TYPE() _OP b.as##_TYPE(); \
+  else  \
+    throw Value::TypeMismatch(); \
+}
+
+VAL_NUM_OPERATOR(+)
+VAL_NUM_OPERATOR(-)
+VAL_NUM_OPERATOR(*)
+VAL_NUM_OPERATOR(/)
+VAL_NUM_OPERATOR(>)
+VAL_NUM_OPERATOR(<)
+
+VAL_OPERATOR(Int, %)
+VAL_OPERATOR(Bool, &&)
+VAL_OPERATOR(Bool, ||)
 
 Value operator >=(const Value &a, const Value &b) 
 {
@@ -62,30 +62,6 @@ Value operator >=(const Value &a, const Value &b)
 Value operator <=(const Value &a, const Value &b) 
 {
   return ! ((a>b).asBool());
-}
-
-Value operator %(const Value &a, const Value &b) 
-{
-  if (a.type() == Value::Int && b.type() == Value::Int)
-    return a.asInt() % b.asInt();
-  else 
-    throw Value::TypeMismatch();
-}
-
-Value operator &&(const Value &a, const Value &b) 
-{
-  if (a.type() == Value::Bool && b.type() == Value::Bool)
-    return a.asBool() && b.asBool();
-  else
-    throw Value::TypeMismatch();
-}
-
-Value operator ||(const Value &a, const Value &b) 
-{
-  if (a.type() == Value::Bool && b.type() == Value::Bool)
-    return a.asBool() || b.asBool();
-  else
-    throw Value::TypeMismatch();
 }
 
 Value operator ==(const Value &a, const Value &b) 
