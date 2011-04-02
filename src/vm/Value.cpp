@@ -1,36 +1,50 @@
 #include "Value.h"
 
-/*
-Value Value::operator +(const Value &v) const
+void Value::ensureType(Value::Type t) const
 {
-  if ((m_type == Int || m_type == Real)
-      && (v.m_type == Int || v.m_type == Real))
+  if (type() != t)
+    throw TypeMismatch();
+}
+
+double Value::toReal() const
+{
+  if (m_type == Int)
+    return asInt();
+  else if (m_type == Real)
+    return asReal();
+  else throw TypeMismatch();
+}
+
+/*
+Value operator +(const Value &a, const Value &b) const
+{
+  if ((a.type() == Value::Int || a.type() == Value::Real)
+      && (b.type() == Value::Int || b.type() == Value::Real))
   {
-    if (m_type == Int && v.m_type == Int)
-      return d.asInt + v.d.asInt;
+    if (a.type() == Value::Int && b.type() == Value::Int)
+      return a.asInt() + b.asInt();
     else
-      return (m_type == Int? double(d.asInt)   : d.asReal)
-         + (v.m_type == Int? double(v.d.asInt) : v.d.asReal);
+      return (a.type() == Value::Int? double(a.asInt())   : d.asReal)
+         + (b.type() == Value::Int? double(b.asInt()) : v.a.asReal());
   }
   else 
-    throw TypeMismatch();
+    throw Value::TypeMismatch();
 }
 */
 
 #define VAL_OPERATOR(_OP) \
-Value Value::operator _OP(const Value &v) const \
+Value operator _OP(const Value &a, const Value &b) \
 { \
-  if ((m_type == Int || m_type == Real) \
-      && (v.m_type == Int || v.m_type == Real)) \
+  if ((a.type() == Value::Int || a.type() == Value::Real) \
+      && (b.type() == Value::Int || b.type() == Value::Real)) \
   { \
-    if (m_type == Int && v.m_type == Int) \
-      return d.asInt _OP v.d.asInt; \
+    if (a.type() == Value::Int && b.type() == Value::Int) \
+      return a.asInt() _OP b.asInt(); \
     else \
-      return (m_type == Int? double(d.asInt)   : d.asReal) \
-        _OP (v.m_type == Int? double(v.d.asInt) : v.d.asReal); \
+      return a.toReal() _OP b.toReal(); \
   } \
   else \
-    throw TypeMismatch(); \
+    throw Value::TypeMismatch(); \
 } 
 
 VAL_OPERATOR(+)
@@ -40,52 +54,53 @@ VAL_OPERATOR(/)
 VAL_OPERATOR(>)
 VAL_OPERATOR(<)
 
-Value Value::operator >=(const Value &v) const
+Value operator >=(const Value &a, const Value &b) 
 {
-  return ! ((*this < v)->asBool);
+  return ! ((a<b).asBool());
 }
 
-Value Value::operator <=(const Value &v) const
+Value operator <=(const Value &a, const Value &b) 
 {
-  return ! ((*this > v)->asBool);
+  return ! ((a>b).asBool());
 }
 
-Value Value::operator %(const Value &v) const
+Value operator %(const Value &a, const Value &b) 
 {
-  if (m_type == Int && v.m_type == Int)
-    return d.asInt % v.d.asInt;
+  if (a.type() == Value::Int && b.type() == Value::Int)
+    return a.asInt() % b.asInt();
   else 
-    throw TypeMismatch();
+    throw Value::TypeMismatch();
 }
 
-Value Value::operator &&(const Value &v) const
+Value operator &&(const Value &a, const Value &b) 
 {
-  if (m_type == Bool && v.m_type == Bool)
-    return d.asBool && v.d.asBool;
+  if (a.type() == Value::Bool && b.type() == Value::Bool)
+    return a.asBool() && b.asBool();
   else
-    throw TypeMismatch();
+    throw Value::TypeMismatch();
 }
 
-Value Value::operator ||(const Value &v) const
+Value operator ||(const Value &a, const Value &b) 
 {
-  if (m_type == Bool && v.m_type == Bool)
-    return d.asBool || v.d.asBool;
+  if (a.type() == Value::Bool && b.type() == Value::Bool)
+    return a.asBool() || b.asBool();
   else
-    throw TypeMismatch();
+    throw Value::TypeMismatch();
 }
 
-Value Value::operator ==(const Value &v) const
+Value operator ==(const Value &a, const Value &b) 
 {
-  if (m_type != v.m_type)
+  if (a.type() != b.type())
     return false;
-  switch (m_type)
+  switch (a.type())
   {
-    case Int: return d.asInt == v.d.asInt;
-    case Real: return d.asReal == v.d.asInt; // FIXME: EPSILON
-    case Bool: return d.asBool == v.d.asBool;
-    case String: return d.asHandle == v.d.asHandle;
+    case Value::Int: return a.asInt() == b.asInt();
+    case Value::Real: return a.asReal() == b.asReal(); // FIXME: EPSILON
+    case Value::Bool: return a.asBool() == b.asBool();
+    case Value::String: return a.asString() == b.asString();
     default:
-      throw TypeMismatch();
+      throw Value::TypeMismatch();
   }
 }
+
 

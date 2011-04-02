@@ -48,7 +48,7 @@ void Executor::exec(const Instruction &instr)
       jump(instr.arg.addr);
       break;
     case Instruction::JumpIfNot:
-      if (!m_context.pop(Value::Bool)->asBool)
+      if (!m_context.pop(Value::Bool).asBool())
         jump(instr.arg.addr);
       break;
     case Instruction::Call:

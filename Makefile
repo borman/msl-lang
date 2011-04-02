@@ -16,7 +16,7 @@ BUILD_MODE ?= DEBUG
 
 ifeq ($(BUILD_MODE), RELEASE) 
 CXX = g++
-CXXFLAGS = -pipe -pedantic -Wall -Wextra -O2 -g
+CXXFLAGS = -pipe -Wall -Wextra -O2 -g -pg
 else
 CXX = g++
 CXXFLAGS = -pipe -Wall -Wextra -g2

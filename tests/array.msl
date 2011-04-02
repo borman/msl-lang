@@ -30,15 +30,7 @@ fun main []
     T = (T*383) % 1543 + 1
   end
 
-  for I from 1 to N
-    do print $Test I  
-  end
-  do println []
-
+  do println Test
   do qsort [Test, 1, N]
-
-  for I from 1 to N
-    do print $Test I  
-  end
-  do println []
+  do println Test
 end

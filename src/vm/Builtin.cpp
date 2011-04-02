@@ -45,13 +45,52 @@ BasicBuiltin::BasicBuiltin(StringTable *strings)
 void BasicBuiltin::array(Executor::Context &context)
 {
   Value size = context.pop(Value::Int);
-  context.push(context.arrays.alloc(size->asInt));
+  context.push(context.arrays.alloc(size.asInt()));
 }
 
 void BasicBuiltin::size(Executor::Context &context)
 {
   Value array = context.pop(Value::Array);
   context.push(static_cast<int>(context.arrays.getArray(array)->size()));
+}
+
+void BasicBuiltin::printValue(const Value &v, const Executor::Context &context, bool escape)
+{
+    switch (v.type())
+    {
+      case Value::Int: 
+        cout.printf("%d", v.asInt()); 
+        break; 
+      case Value::Real: 
+        cout.printf("%lf", v.asReal()); 
+        break;
+      case Value::Bool: 
+        cout.printf("%s", v.asBool()? "true" : "false"); 
+        break;
+      case Value::String: 
+        cout.printf(escape? "\"%s\"" : "%s", context.strings->str(v.asString())); 
+        break;
+      case Value::TupOpen:
+        cout.printf("[");
+        break;
+      case Value::TupClose:
+        cout.printf("]");
+        break;
+      case Value::Array:
+      {
+        const Vector<Value> &items = *(context.arrays.getArray(v));
+        cout.printf("(");
+        for (size_t i=0; i<items.size(); i++)
+        {
+          if (i>0)
+            cout.printf(" ");
+          printValue(items[i], context, true);
+        }
+        cout.printf(")");
+      } break;
+      default:
+        break;
+    }
 }
 
 void BasicBuiltin::print(Executor::Context &context)
@@ -71,26 +110,9 @@ void BasicBuiltin::print(Executor::Context &context)
 
   while (!args.empty())
   {
-    Value v = args.top();
-    args.pop();
-    switch (v.type())
-    {
-      case Value::Int: 
-        cout.printf("%d", v->asInt); 
-        break; 
-      case Value::Real: 
-        cout.printf("%lf", v->asReal); 
-        break;
-      case Value::Bool: 
-        cout.printf("%s", v->asBool? "true": "false"); 
-        break;
-      case Value::String: 
-        cout.printf("%s", context.strings->str(v->asHandle)); 
-        break;
-      default: 
-        break;
-    }
+    printValue(args.top(), context);
     cout.printf(" ");
+    args.pop();
   }
 
   // Void return
@@ -108,17 +130,7 @@ void BasicBuiltin::stackTrace(Executor::Context &context)
 {
   for (size_t i=0; i<context.stack.size(); i++)
   {
-    const Value &v = context.stack[i];
-    switch (v.type())
-    {
-      case Value::Int: cout.printf("%d", v->asInt); break;
-      case Value::Real: cout.printf("%lf", v->asReal); break;
-      case Value::Bool: cout.printf("%s", v->asBool? "true": "false"); break;
-      case Value::String: cout.printf("%s", context.strings->str(v->asHandle)); break;
-      case Value::TupOpen: cout.printf("["); break;
-      case Value::TupClose: cout.printf("]"); break;
-      default: break;
-    }
+    printValue(context.stack[i], context);
     cout.printf(" ");
   }
   cout.printf("\n");

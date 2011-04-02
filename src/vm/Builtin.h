@@ -44,6 +44,8 @@ class BasicBuiltin: public ListedBuiltin
     BasicBuiltin(StringTable *strings);
 
   private:
+    static void printValue(const Value &value, const Executor::Context &context, bool escape=false);
+
     static void array(Executor::Context &context);
     static void size(Executor::Context &context);
     static void print(Executor::Context &context);

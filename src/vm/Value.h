@@ -14,6 +14,23 @@ class Value
       TupOpen, TupClose,
       Int, Real, Bool, String, Array
     };
+
+    Value(int i=0):                  m_type(Int)    { d.asInt    = i; }
+    Value(double r):                 m_type(Real)   { d.asReal   = r; }
+    Value(bool b):                   m_type(Bool)   { d.asBool   = b; }
+    Value(Type t, unsigned int h=0): m_type(t)      { d.asHandle = h; }
+
+    Type type() const { return m_type; }
+
+    int          asInt()    const { ensureType(Int);    return d.asInt;    }
+    double       asReal()   const { ensureType(Real);   return d.asReal;   }
+    bool         asBool()   const { ensureType(Bool);   return d.asBool;   }
+    unsigned int asString() const { ensureType(String); return d.asHandle; }
+    unsigned int asArray()  const { ensureType(Array);  return d.asHandle; }
+
+    double toReal() const;
+  private:
+    void ensureType(Type t) const;
     union Data
     {
       int asInt;
@@ -22,30 +39,22 @@ class Value
       unsigned int asHandle;
     };
 
-    Value(int i=0):                  m_type(Int)    { d.asInt = i; }
-    Value(double r):                 m_type(Real)   { d.asReal = r; }
-    Value(bool b):                   m_type(Bool)   { d.asBool = b; }
-    Value(Type t, unsigned int h=0): m_type(t)      { d.asHandle = h; }
-
-    const Data *operator ->() const { return &d; }
-    Type type() const { return m_type; }
-
-    Value operator +(const Value &v) const;
-    Value operator -(const Value &v) const;
-    Value operator *(const Value &v) const;
-    Value operator /(const Value &v) const;
-    Value operator %(const Value &v) const;
-    Value operator >(const Value &v) const;
-    Value operator <(const Value &v) const;
-    Value operator >=(const Value &v) const;
-    Value operator <=(const Value &v) const;
-    Value operator ==(const Value &v) const;
-    Value operator &&(const Value &v) const;
-    Value operator ||(const Value &v) const;
-
-  private:
     Type m_type;
     Data d;
 };
+
+Value operator +(const Value &a, const Value &b);
+Value operator -(const Value &a, const Value &b);
+Value operator *(const Value &a, const Value &b);
+Value operator /(const Value &a, const Value &b);
+Value operator %(const Value &a, const Value &b);
+Value operator >(const Value &a, const Value &b);
+Value operator <(const Value &a, const Value &b);
+Value operator >=(const Value &a, const Value &b);
+Value operator <=(const Value &a, const Value &b);
+Value operator ==(const Value &a, const Value &b);
+Value operator &&(const Value &a, const Value &b);
+Value operator ||(const Value &a, const Value &b);
+
 
 #endif // VALUE_H
