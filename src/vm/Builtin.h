@@ -4,18 +4,24 @@
 #include "Stack.h"
 #include "Value.h"
 #include "StringTable.h"
-#include "Executor.h"
+#include "Context.h"
 
+/**
+ * A builtin function call handler.
+ * 
+ * Dispatches function calls. Several AbstractBuiltin handlers may be
+ * installed in a single Executor.
+ */
 class AbstractBuiltin
 {
   public:
-    virtual bool call(unsigned int name, Executor::Context &context) = 0;
+    virtual bool call(unsigned int name, Context &context) = 0;
 };
 
 class ListedBuiltin: public AbstractBuiltin
 {
   public:
-    typedef void (*Function)(Executor::Context &context);
+    typedef void (*Function)(Context &context);
     struct Definition
     {
       const char *name;
@@ -25,7 +31,7 @@ class ListedBuiltin: public AbstractBuiltin
     ListedBuiltin(StringTable *strings, const Definition *defs, size_t count);
     ~ListedBuiltin();
 
-    virtual bool call(unsigned int name, Executor::Context &context);
+    virtual bool call(unsigned int name, Context &context);
 
   private:
     struct Binding
@@ -36,23 +42,6 @@ class ListedBuiltin: public AbstractBuiltin
 
     Binding *m_bindings;
     size_t m_bindingCount;
-};
-
-class BasicBuiltin: public ListedBuiltin
-{
-  public:
-    BasicBuiltin(StringTable *strings);
-
-  private:
-    static void printValue(const Value &value, const Executor::Context &context, bool escape=false);
-
-    static void array(Executor::Context &context);
-    static void size(Executor::Context &context);
-    static void print(Executor::Context &context);
-    static void println(Executor::Context &context);
-    static void stackTrace(Executor::Context &context);
-
-    static const ListedBuiltin::Definition defs[];
 };
 
 #endif // BUILTIN_H

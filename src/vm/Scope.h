@@ -4,6 +4,11 @@
 #include "Value.h"
 #include "Map.h"
 
+/**
+ * A Scope is a key-value storage of variables
+ *
+ * Scopes are stacked to implement local variables
+ */
 class Scope
 {
   public:

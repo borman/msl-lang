@@ -6,11 +6,14 @@
 #include "Program.h"
 #include "StringTable.h"
 #include "Value.h"
-#include "Scope.h"
-#include "ArrayStorage.h"
+#include "Context.h"
+#include "Builtin.h"
 
-class AbstractBuiltin;
-
+/**
+ * A linear code executor.
+ *
+ * Implements a stack machine.
+ */
 class Executor
 {
   public:
@@ -28,29 +31,6 @@ class Executor
         private:
           Type m_type;
           size_t m_addr;
-    };
-
-    struct Context
-    {
-      class BadType {};
-
-      // Stack operations
-      void push(const Value &v);
-      Value pop();
-      Value pop(Value::Type t);
-      void popdelete();
-
-      // Variable referencing
-      Value getVar(unsigned int name);
-      void setVar(unsigned int name, const Value &val);
-
-      void openScope();
-      void closeScope();
-
-      Stack<Value> stack;
-      Stack<Scope> scope;
-      ArrayStorage arrays;
-      StringTable *strings;
     };
 
     Executor(Program &program, StringTable *strings);
@@ -75,6 +55,7 @@ class Executor
         const Value &left, const Value &right);
     void step();
 
+    // Data
     Program &m_prog;
     size_t m_pc;
     bool m_stopped;

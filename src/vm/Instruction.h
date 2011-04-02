@@ -4,6 +4,11 @@
 #include "Atom.h"
 #include "AST.h"
 
+/**
+ * One stack machine instruction, nothing more.
+ *
+ * It has 0 or 1 operand.
+ */
 struct Instruction
 {
   enum Opcode

@@ -4,6 +4,11 @@
 #include "Value.h"
 #include "Vector.h"
 
+/**
+ * An array store.
+ * 
+ * Does all dirty memory management behind the scene.
+ */
 class ArrayStorage 
 {
   public:

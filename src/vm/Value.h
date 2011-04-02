@@ -3,6 +3,11 @@
 
 #include "File.h"
 
+/**
+ * A Value is a variant-typed box with some data.
+ *
+ * Complex data structures like strings and arrays are stored as handles.
+ */
 class Value
 {
   public:

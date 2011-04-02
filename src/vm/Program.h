@@ -4,6 +4,10 @@
 #include "Vector.h"
 #include "Instruction.h"
 
+/**
+ * A Program is a sequence of instructions with some named entry points 
+ * defined. Entry points represent function entries.
+ */
 class Program
 {
   public:
@@ -28,7 +32,7 @@ class Program
     const Instruction &operator[](size_t addr) const { return m_instrs[addr]; }
 
     size_t entryCount() const { return m_entries.size(); }
-    const EntryPoint entry(size_t i) const { return m_entries[i]; }
+    const EntryPoint &entry(size_t i) const { return m_entries[i]; }
     void addEntry(const EntryPoint &e) { m_entries.push_back(e); }
   private:
     Vector<Instruction> m_instrs;
