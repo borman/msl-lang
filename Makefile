@@ -1,6 +1,6 @@
 ### PROJECT
 
-MODULES = compiler vm util ministl
+MODULES = compiler vm util ministl highlevel
 SOURCE_DIRS = src $(addprefix src/,$(MODULES))
 SOURCES = $(notdir $(wildcard $(addsuffix /*.cpp,$(SOURCE_DIRS))))
 INCLUDEPATH = $(SOURCE_DIRS)
@@ -16,7 +16,7 @@ BUILD_MODE ?= DEBUG
 
 ifeq ($(BUILD_MODE), RELEASE) 
 CXX = g++
-CXXFLAGS = -pipe -Wall -Wextra -O2 -g -pg
+CXXFLAGS = -pipe -Wall -Wextra -O2 -g 
 else
 CXX = g++
 CXXFLAGS = -pipe -Wall -Wextra -g2

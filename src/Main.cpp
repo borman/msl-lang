@@ -1,80 +1,38 @@
-#include "AST.h"
-#include "Lexer.h"
-#include "Parser.h"
-#include "Compiler.h"
+#include <cstring>
+#include "LoadedProgram.h"
 #include "Executor.h"
 #include "BasicBuiltin.h"
-#include "ASTPrint.h"
 #include "File.h"
-#include "FileCharSource.h"
-#include "Symbols.h"
-
-const char astFileName[] = "ast.lisp";
-const char asmFileName[] = "asm.lst";
 
 using namespace AST;
 
-int main()
+int main(int argc, char **argv)
 {
-  Program program;
-  StringTable strings;
-  
+  if (argc != 2)
+  {
+    cout.printf("Usage: %s <file.msl>\n", argv[0]);
+    return 1;
+  }
+
+  const char *filename = argv[1];
   try
   {
-    File astFile(astFileName);
-    File asmFile(asmFileName);
+    LoadedProgram program(filename);
 
-    FileCharSource input(&cin);
-    Lexer lexer(&input, &strings);
-    Parser parser(&lexer);
-    Compiler compiler(program);
+    BasicBuiltin builtins(program.strings());
 
-    Fun *funs = parser.getAll();
-
-    printBlock(&astFile, "program", funs);
-    astFile.printf("\n");
-
-    compiler.compile(funs);
-    printCode(&asmFile, program, &strings);
-
-    deleteChain(funs);
-  }
-  catch (const Lexer::Exception &e)
-  {
-    cout.printf("stdin:%u:%u: Tokenizer error: %s\n", e.row()+1, e.col()+1, e.text());
-    return 1;
-  }
-  catch (const LexemGenerator::Exception &e)
-  {
-    const TextRegion &r = e.region();
-    cout.printf("stdin:%u:%u-%u:%u: Lexer error: %s in \"%s\"\n",
-           r.startRow+1, r.startCol+1, r.endRow+1, r.endCol+1,
-           e.text(), e.token().c_str());
-    return 1;
-  }
-  catch (const Parser::SymbolExpected &e)
-  {
-    const TextRegion &r = e.region();
-    cout.printf("stdin:%u:%u-%u:%u: Parser error: '%s' expected\n", 
-        r.startRow+1, r.startCol+1, r.endRow+1, r.endCol+1,
-        Symbols::name(e.symbol()));
-    return 1;
-  }
-  catch (const Parser::Exception &e)
-  {
-    const TextRegion &r = e.region();
-    cout.printf("stdin:%u:%u-%u:%u: Parser error: %s expected\n", 
-        r.startRow+1, r.startCol+1, r.endRow+1, r.endCol+1,
-        e.text());
-    return 1;
-  }
-
-  try
-  {
-    BasicBuiltin builtins(&strings);
-    Executor executor(program, &strings);
+    Executor executor(program, program.strings());
     executor.addBuiltin(&builtins);
-    executor.run(strings.id("main"));
+    executor.run("main");
+  }
+  catch (const File::Exception &e)
+  {
+    cout.printf("%s: %s\n", filename, strerror(e.code()));
+  }
+  catch (const LoadedProgram::Exception &e)
+  {
+    cout.printf("%s:%s\n", filename, e.text());
+    return 1;
   }
   catch (const Executor::Exception &e)
   {

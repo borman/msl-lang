@@ -155,6 +155,13 @@ void Executor::ret()
     m_stopped = true;
 }
     
+// =============
+
+void Executor::run(const char *entryName)
+{
+  run(m_context.strings->id(entryName));
+}
+
 void Executor::run(unsigned int entryFun)
 {
   try

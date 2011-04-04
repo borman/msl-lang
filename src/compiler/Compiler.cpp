@@ -2,6 +2,8 @@
 #include "Stack.h"
 #include "Compiler.h"
 
+// #define COMPILER_TRACE_AST
+
 using namespace AST;
 
 void Compiler::compile(Fun *funs)
@@ -41,7 +43,9 @@ void Compiler::compileBlock(Operator *block)
 
 void Compiler::compileOperator(Operator *op)
 {
+#ifdef COMPILER_TRACE_AST
   emit(Instruction::Trace, op); // Trace
+#endif
 
   switch (op->type())
   {

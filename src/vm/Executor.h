@@ -37,6 +37,7 @@ class Executor
 
     void addBuiltin(AbstractBuiltin *b);
     void run(unsigned int entryFun);
+    void run(const char *entryName);
 
   private:
     // Branching

@@ -21,7 +21,7 @@ class File
         int m_code;
     };
 
-    File(const char *name, Mode mode = Write);
+    File(const char *name, Mode mode);
     File(FILE *exfile);
     ~File();
 
