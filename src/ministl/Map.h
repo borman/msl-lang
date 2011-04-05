@@ -31,7 +31,7 @@ class Map
 
     size_t count(const K &key) const
     {
-      unsigned int pos;
+      size_t pos;
       if (find(key, pos))
         return 1;
       else

@@ -37,21 +37,27 @@ Value Context::pop(Value::Type type)
 
 Value Context::getVar(unsigned int name)
 {
-  return scope.top().getVar(name);
+  if (globals.isVar(name))
+    return globals.getVar(name);
+  else
+    return locals.top().getVar(name);
 }
 
 void Context::setVar(unsigned int name, const Value &val)
 {
-  return scope.top().setVar(name, val);
+  if (globals.isVar(name))
+    globals.setVar(name, val);
+  else
+    locals.top().setVar(name, val);
 }
 
 void Context::openScope()
 {
-  scope.push(Scope());
+  locals.push(Scope());
 }
 
 void Context::closeScope()
 {
-  scope.pop();
+  locals.pop();
 }
 

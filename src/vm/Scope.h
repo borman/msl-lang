@@ -17,6 +17,7 @@ class Scope
 
     Value getVar(unsigned int id) const;
     void setVar(unsigned int id, const Value &val);
+    bool isVar(unsigned int id) const;
   private:
     Map<unsigned int, Value> m_vars;
 };

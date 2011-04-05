@@ -1,0 +1,16 @@
+global RandSeed
+
+fun rand []
+  RandSeed = (RandSeed * 1277) % 131072
+  return RandSeed
+end
+
+fun main []
+  RandSeed = 1864
+  for I from 1 to 100 do
+    Val = rand []
+    print Val
+    Seed = Val
+  end
+  println []
+end

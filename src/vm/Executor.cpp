@@ -7,6 +7,8 @@ Executor::Executor(Program &program, StringTable *strings)
   : m_prog(program), m_pc(0), m_stopped(true) 
 {
   m_context.strings = strings;
+  for (size_t i=0; i<program.globalsCount(); i++)
+    m_context.globals.setVar(program.global(i), 0);
 }
 
 void Executor::exec(const Instruction &instr)

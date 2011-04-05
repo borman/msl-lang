@@ -34,9 +34,14 @@ class Program
     size_t entryCount() const { return m_entries.size(); }
     const EntryPoint &entry(size_t i) const { return m_entries[i]; }
     void addEntry(const EntryPoint &e) { m_entries.push_back(e); }
+
+    size_t globalsCount() const { return m_globals.size(); }
+    unsigned int global(size_t i) const { return m_globals[i]; }
+    void addGlobal(unsigned int g) { m_globals.push_back(g); }
   private:
     Vector<Instruction> m_instrs;
     Vector<EntryPoint> m_entries;
+    Vector<unsigned int> m_globals;
 };
 
 #endif // PROGRAM_H

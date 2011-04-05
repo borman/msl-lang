@@ -33,7 +33,8 @@ struct Context
   void closeScope();
 
   Stack<Value> stack;
-  Stack<Scope> scope;
+  Scope globals;
+  Stack<Scope> locals;
   ArrayStorage arrays;
   StringTable *strings;
 };

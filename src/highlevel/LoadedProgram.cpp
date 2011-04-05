@@ -34,6 +34,8 @@ void LoadedProgram::load(DataSource<int> &src)
     {
       if (ast->type() == AST::Base::Fun)
         compiler.compile(ast->as<AST::Fun>());
+      else if (ast->type() == AST::Base::GlobalVar)
+        addGlobal(ast->as<AST::GlobalVar>()->var()->name().id());
       deleteChain(ast);
     }
   }
