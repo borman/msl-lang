@@ -10,23 +10,34 @@ TopLevel *Parser::getNext()
   if (next<Base>() == NULL)
     return NULL;
   else
-    return readFun();
+    return readTopLevel();
 }
 
 
-Fun *Parser::readFun()
+TopLevel *Parser::readTopLevel()
 {
-  consumeSym(Symbol::Fun);
-  
-  expect(Base::FuncCall);
-  const Atom name = next<FuncCall>()->name();
-  deleteNext();
+  if (nextIsSym(Symbol::Fun))
+  {
+    consumeSym(Symbol::Fun);
 
-  SafePtr<Expression> arg(readSExpr());
-  expectLValue(arg.keep());
-  SafePtr<Operator> body(readBlock());
+    expect(Base::FuncCall);
+    const Atom name = next<FuncCall>()->name();
+    deleteNext();
 
-  return new Fun(name, arg, body);
+    SafePtr<Expression> arg(readSExpr());
+    expectLValue(arg.keep());
+    SafePtr<Operator> body(readBlock());
+
+    return new Fun(name, arg, body);
+  }
+  else if (nextIsSym(Symbol::Global))
+  {
+    consumeSym(Symbol::Global);
+    expect(Base::Variable);
+    return new GlobalVar(takeNext<Variable>());
+  }
+  else
+    throw Exception("TopLevel", next<Base>()->region());
 }
 
 Operator *Parser::readBlock()

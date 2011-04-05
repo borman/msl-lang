@@ -35,7 +35,7 @@ class Parser: public DataSource<AST::TopLevel *>
     virtual AST::TopLevel *getNext();
 
   private:
-    AST::Fun *readFun();
+    AST::TopLevel *readTopLevel();
     AST::Operator *readBlock();
     AST::Operator *readOperator();
     AST::Operator *readOperatorReturn();

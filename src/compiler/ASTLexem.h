@@ -14,7 +14,7 @@ namespace AST
       enum Subtype
       {
         // Keywords
-        Fun, End,
+        Fun, Global, End,
         Do, Return,
         For, From, To,
         While,

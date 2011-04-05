@@ -6,6 +6,7 @@ using namespace AST;
 const Symbols::Definition Symbols::symbolTbl[] =
 {
   {"fun",   Symbol::Fun     },
+  {"global",Symbol::Global  },
   {"end",   Symbol::End     },
   {"do",    Symbol::Do      },
   {"return",Symbol::Return  },
