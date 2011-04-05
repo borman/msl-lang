@@ -15,11 +15,11 @@ class BasicBuiltin: public ListedBuiltin
   private:
     static void printValue(const Value &value, const Context &context, bool escape=false);
 
-    static void array(Context &context);
-    static void size(Context &context);
-    static void print(Context &context);
-    static void println(Context &context);
-    static void stackTrace(Context &context);
+    static void array(ListedBuiltin *self, Context &context);
+    static void size(ListedBuiltin *self, Context &context);
+    static void print(ListedBuiltin *self, Context &context);
+    static void println(ListedBuiltin *self, Context &context);
+    static void stackTrace(ListedBuiltin *self, Context &context);
 
     static const ListedBuiltin::Definition defs[];
 };

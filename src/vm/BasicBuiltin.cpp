@@ -14,13 +14,13 @@ BasicBuiltin::BasicBuiltin(StringTable *strings)
 {
 }
 
-void BasicBuiltin::array(Context &context)
+void BasicBuiltin::array(ListedBuiltin *, Context &context)
 {
   Value size = context.pop(Value::Int);
   context.push(context.arrays.alloc(size.asInt()));
 }
 
-void BasicBuiltin::size(Context &context)
+void BasicBuiltin::size(ListedBuiltin *, Context &context)
 {
   Value array = context.pop(Value::Array);
   context.push(static_cast<int>(context.arrays.getArray(array)->size()));
@@ -65,7 +65,7 @@ void BasicBuiltin::printValue(const Value &v, const Context &context, bool escap
     }
 }
 
-void BasicBuiltin::print(Context &context)
+void BasicBuiltin::print(ListedBuiltin *, Context &context)
 {
   unsigned int level = 0;
   Stack<Value> args;
@@ -92,13 +92,13 @@ void BasicBuiltin::print(Context &context)
   context.stack.push(Value::TupClose);
 }
 
-void BasicBuiltin::println(Context &context)
+void BasicBuiltin::println(ListedBuiltin *self, Context &context)
 {
-  print(context);
+  print(self, context);
   cout.printf("\n");
 }
 
-void BasicBuiltin::stackTrace(Context &context)
+void BasicBuiltin::stackTrace(ListedBuiltin *, Context &context)
 {
   for (size_t i=0; i<context.stack.size(); i++)
   {

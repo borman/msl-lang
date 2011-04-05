@@ -21,7 +21,7 @@ bool ListedBuiltin::call(unsigned int name, Context &context)
   for (size_t i=0; i<m_bindingCount; i++)
     if (name == m_bindings[i].name)
     {
-      m_bindings[i].func(context);
+      m_bindings[i].func(this, context);
       return true;
     }
   return false;

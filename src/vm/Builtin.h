@@ -21,7 +21,7 @@ class AbstractBuiltin
 class ListedBuiltin: public AbstractBuiltin
 {
   public:
-    typedef void (*Function)(Context &context);
+    typedef void (*Function)(ListedBuiltin *self, Context &context);
     struct Definition
     {
       const char *name;
