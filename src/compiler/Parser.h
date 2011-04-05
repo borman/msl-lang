@@ -5,7 +5,7 @@
 #include "ListBuilder.h"
 #include "DataSource.h"
 
-class Parser: public DataSource<AST::Fun *>
+class Parser: public DataSource<AST::TopLevel *>
 {
   public:
     class Exception
@@ -32,8 +32,7 @@ class Parser: public DataSource<AST::Fun *>
     Parser(DataSource<AST::Base *> *source): m_source(source), m_next(NULL) {}
     ~Parser() { delete m_next; }
 
-    virtual AST::Fun *getNext();
-    AST::Fun *getAll();
+    virtual AST::TopLevel *getNext();
 
   private:
     AST::Fun *readFun();

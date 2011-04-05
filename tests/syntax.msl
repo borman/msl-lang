@@ -22,7 +22,7 @@ fun on_turn N
 
   ; Интеграл от кол-ва продукции
   NRich = 0
-  for I from 1 to NPlayers
+  for I from 1 to NPlayers do
     $Something(I) = $Something(I) + production I
     NRich = NRich + if balance I > 10000 then 1 else 0
   end
@@ -30,7 +30,7 @@ fun on_turn N
   ; While
   N = 5
   Ok = true
-  while N > 0
+  while N > 0 do
     N = N-1
     Ok = Ok and not (N % 6 = 5)
   end

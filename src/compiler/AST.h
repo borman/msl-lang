@@ -5,6 +5,7 @@
 #include "ASTExpr.h"
 #include "ASTLexem.h"
 #include "ASTOperator.h"
+#include "ASTTopLevel.h"
 
 namespace AST
 {

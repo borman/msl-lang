@@ -14,7 +14,6 @@ namespace AST
    * Base
    * |
    * | // Lexems
-   * |- Token
    * |- Symbol
    * | 
    * |- Expression
@@ -37,7 +36,9 @@ namespace AST
    * |  |- While
    * |  `- For
    * |
-   * `- Fun
+   * `- TopLevel
+   *    |- Fun
+   *    `- GlobalVar
    */
   class Base
   {
@@ -46,7 +47,7 @@ namespace AST
       {
         None,
         // Intermediate forms
-        Token, Symbol, 
+        Symbol, 
         // Constants
         Literal, Real, Int, Bool,
         // Complex expression items
@@ -54,7 +55,7 @@ namespace AST
         // Operators
         Let, Do, Return, If, While, For,
         // Top-level item
-        Fun
+        Fun, GlobalVar
       };
 
       static const Type m_class_type = None;

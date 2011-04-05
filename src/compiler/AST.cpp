@@ -25,7 +25,6 @@ static void deleteSubtree(Base *root)
     case Base::Bool:
     case Base::Literal:
     case Base::Variable:
-    case Base::Token:
     case Base::Symbol:
     case Base::None:
       break;
@@ -87,6 +86,10 @@ static void deleteSubtree(Base *root)
     case Base::Fun:
       deleteChain(root->as<Fun>()->arg());
       deleteChain(root->as<Fun>()->body());
+      break;
+
+    case Base::GlobalVar:
+      deleteChain(root->as<GlobalVar>()->var());
       break;
   }
   delete root;

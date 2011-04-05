@@ -113,24 +113,6 @@ namespace AST
       Expression *m_to;
       Operator *m_body;
   };
-
-  class Fun: public Base
-  {
-    public:
-      static const Base::Type m_class_type = Base::Fun;
-
-      Fun(const Atom &name, Expression *arg, Operator *body, const TextRegion &r = TextRegion())
-        : Base(m_class_type, r),
-          m_name(name), m_arg(arg), m_body(body) {} 
-
-      Atom name() const { return m_name; }
-      Expression *arg() const { return m_arg; }
-      Operator *body() const { return m_body; }
-    private:
-      Atom m_name;
-      Expression *m_arg;
-      Operator *m_body;
-  };
 }
 
 #endif // ASTOPERATOR_H

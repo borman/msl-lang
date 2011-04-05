@@ -29,10 +29,13 @@ void LoadedProgram::load(DataSource<int> &src)
     Compiler compiler(*this);
 
     // (Read -> Tokenize -> Lex -> Parse) chain
-    AST::Fun *funs = parser.getAll();
-    compiler.compile(funs);
-
-    deleteChain(funs);
+    AST::TopLevel *ast;
+    while ((ast = parser.getNext()) != NULL)
+    {
+      if (ast->type() == AST::Base::Fun)
+        compiler.compile(ast->as<AST::Fun>());
+      deleteChain(ast);
+    }
   }
   catch (const Lexer::Exception &e)
   {

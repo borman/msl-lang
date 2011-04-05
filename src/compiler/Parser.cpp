@@ -5,16 +5,7 @@ using namespace AST;
 
 // TODO: Track text regions
 
-Fun *Parser::getAll()
-{
-  Fun *t;
-  ListBuilder<Fun> funs;
-  while ((t = getNext()) != NULL)
-    funs.add(t);
-  return funs.takeAll();
-}
-
-Fun *Parser::getNext()
+TopLevel *Parser::getNext()
 {
   if (next<Base>() == NULL)
     return NULL;
