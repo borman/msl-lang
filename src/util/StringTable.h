@@ -6,13 +6,15 @@
 class StringTable
 {
   public:
+    typedef unsigned int Ref;
+
     ~StringTable();
 
-    const char *str(unsigned int id) const { return m_strs[id]; }
-    unsigned int id(const char *str);
+    const char *str(Ref id) const { return m_strs[id]; }
+    Ref id(const char *str);
   private:
-    bool find(const char *str, unsigned int &where);
-    unsigned int add(const char *str);
+    bool find(const char *str, Ref &where);
+    Ref add(const char *str);
     Vector<char *> m_strs;
 };
 

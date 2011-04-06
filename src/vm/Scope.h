@@ -15,11 +15,11 @@ class Scope
     // Exception
     class VarNotFound {};
 
-    Value getVar(unsigned int id) const;
-    void setVar(unsigned int id, const Value &val);
-    bool isVar(unsigned int id) const;
+    Value getVar(StringTable::Ref id) const;
+    void setVar(StringTable::Ref id, const Value &val);
+    bool isVar(StringTable::Ref id) const;
   private:
-    Map<unsigned int, Value> m_vars;
+    Map<StringTable::Ref, Value> m_vars;
 };
 
 #endif // SCOPE_H

@@ -34,7 +34,7 @@ struct Instruction
     double realval;
     bool boolval;
     size_t addr;
-    unsigned int atom;
+    StringTable::Ref atom;
     AST::Base *trace;
   };
 

@@ -124,7 +124,7 @@ void Executor::jump(size_t addr)
 }
 
 
-void Executor::call(unsigned int name, bool saveRet)
+void Executor::call(StringTable::Ref name, bool saveRet)
 {
   // Builtin
   for (size_t i=0; i<m_builtins.size(); i++)
@@ -164,7 +164,7 @@ void Executor::run(const char *entryName)
   run(m_context.strings->id(entryName));
 }
 
-void Executor::run(unsigned int entryFun)
+void Executor::run(StringTable::Ref entryFun)
 {
   try
   {

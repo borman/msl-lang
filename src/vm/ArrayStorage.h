@@ -13,9 +13,10 @@ class ArrayStorage
 {
   public:
     // Exceptions
-    class BadSize {};
-    class BadRef {};
-    class BadIndex {}; 
+    class Exception {};
+    class BadSize: public Exception {};
+    class BadRef: public Exception {};
+    class BadIndex: public Exception {}; 
 
     ArrayStorage();
     ~ArrayStorage();

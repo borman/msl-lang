@@ -36,12 +36,12 @@ class Program
     void addEntry(const EntryPoint &e) { m_entries.push_back(e); }
 
     size_t globalsCount() const { return m_globals.size(); }
-    unsigned int global(size_t i) const { return m_globals[i]; }
-    void addGlobal(unsigned int g) { m_globals.push_back(g); }
+    StringTable::Ref global(size_t i) const { return m_globals[i]; }
+    void addGlobal(StringTable::Ref g) { m_globals.push_back(g); }
   private:
     Vector<Instruction> m_instrs;
     Vector<EntryPoint> m_entries;
-    Vector<unsigned int> m_globals;
+    Vector<StringTable::Ref> m_globals;
 };
 
 #endif // PROGRAM_H

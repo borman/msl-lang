@@ -36,12 +36,12 @@ class Executor
     Executor(Program &program, StringTable *strings);
 
     void addBuiltin(AbstractBuiltin *b);
-    void run(unsigned int entryFun);
+    void run(StringTable::Ref entryFun);
     void run(const char *entryName);
 
   private:
     // Branching
-    void call(unsigned int name, bool saveRet=true);
+    void call(StringTable::Ref name, bool saveRet=true);
     void jump(size_t addr);
     void ret();
 

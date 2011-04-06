@@ -15,7 +15,7 @@
 class AbstractBuiltin
 {
   public:
-    virtual bool call(unsigned int name, Context &context) = 0;
+    virtual bool call(StringTable::Ref name, Context &context) = 0;
 };
 
 class ListedBuiltin: public AbstractBuiltin
@@ -31,12 +31,12 @@ class ListedBuiltin: public AbstractBuiltin
     ListedBuiltin(StringTable *strings, const Definition *defs, size_t count);
     ~ListedBuiltin();
 
-    virtual bool call(unsigned int name, Context &context);
+    virtual bool call(StringTable::Ref name, Context &context);
 
   private:
     struct Binding
     {
-      unsigned int name;
+      StringTable::Ref name;
       Function func;
     };
 

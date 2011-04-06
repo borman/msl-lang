@@ -2,6 +2,7 @@
 #define VALUE_H
 
 #include "File.h"
+#include "Atom.h"
 
 /**
  * A Value is a variant-typed box with some data.
@@ -23,15 +24,16 @@ class Value
     Value(int i=0):                  m_type(Int)    { d.asInt    = i; }
     Value(double r):                 m_type(Real)   { d.asReal   = r; }
     Value(bool b):                   m_type(Bool)   { d.asBool   = b; }
+    Value(const Atom &a):            m_type(String) { d.asHandle = a.id(); }
     Value(Type t, unsigned int h=0): m_type(t)      { d.asHandle = h; }
 
     Type type() const { return m_type; }
 
-    int          asInt()    const { ensureType(Int);    return d.asInt;    }
-    double       asReal()   const { ensureType(Real);   return d.asReal;   }
-    bool         asBool()   const { ensureType(Bool);   return d.asBool;   }
-    unsigned int asString() const { ensureType(String); return d.asHandle; }
-    unsigned int asArray()  const { ensureType(Array);  return d.asHandle; }
+    int               asInt()    const { ensureType(Int);    return d.asInt;    }
+    double            asReal()   const { ensureType(Real);   return d.asReal;   }
+    bool              asBool()   const { ensureType(Bool);   return d.asBool;   }
+    StringTable::Ref  asString() const { ensureType(String); return d.asHandle; }
+    unsigned int      asArray()  const { ensureType(Array);  return d.asHandle; }
 
     double toReal() const;
   private:

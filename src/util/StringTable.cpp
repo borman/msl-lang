@@ -7,7 +7,7 @@ StringTable::~StringTable()
     delete[] m_strs[i];
 }
 
-unsigned int StringTable::id(const char *str)
+StringTable::Ref StringTable::id(const char *str)
 {
   unsigned int ret;
   if (find(str, ret))
@@ -16,7 +16,7 @@ unsigned int StringTable::id(const char *str)
     return add(str);
 }
 
-bool StringTable::find(const char *str, unsigned int &where)
+bool StringTable::find(const char *str, StringTable::Ref &where)
 {
   for (size_t i=0; i<m_strs.size(); i++)
     if (strcmp(str, m_strs[i]) == 0)
@@ -27,7 +27,7 @@ bool StringTable::find(const char *str, unsigned int &where)
   return false;
 }
 
-unsigned int StringTable::add(const char *str)
+StringTable::Ref StringTable::add(const char *str)
 {
   size_t length = strlen(str);
   char *stored = new char[length+1];

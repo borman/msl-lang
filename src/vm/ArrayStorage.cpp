@@ -16,11 +16,11 @@ Value ArrayStorage::alloc(int size)
   if (size < 0)
     throw BadSize();
 
-  unsigned int pos = m_arrays.size();
+  size_t pos = m_arrays.size();
   Vector<Value> *new_val = new Vector<Value>(size);
 
   // Find empty space
-  for (unsigned int i=0; i<m_arrays.size(); i++)
+  for (size_t i=0; i<m_arrays.size(); i++)
     if (m_arrays[i] == NULL)
       pos = i; 
 

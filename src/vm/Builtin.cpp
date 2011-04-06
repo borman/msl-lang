@@ -16,7 +16,7 @@ ListedBuiltin::~ListedBuiltin()
   delete[] m_bindings;
 }
 
-bool ListedBuiltin::call(unsigned int name, Context &context)
+bool ListedBuiltin::call(StringTable::Ref name, Context &context)
 {
   for (size_t i=0; i<m_bindingCount; i++)
     if (name == m_bindings[i].name)
