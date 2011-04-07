@@ -1,6 +1,7 @@
 #ifndef ATOM_H
 #define ATOM_H
 
+#include <cstring>
 #include "StringTable.h"
 
 class Atom
@@ -14,6 +15,7 @@ class Atom
     const char *c_str() const { return m_table->str(m_id); }
     StringTable::Ref id() const { return m_id; }
 
+    bool operator ==(const char *str) const { return 0 == strcmp(c_str(), str); }
   private:
     StringTable::Ref m_id;
     StringTable *m_table;
