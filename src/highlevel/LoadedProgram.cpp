@@ -7,6 +7,7 @@
 #include "Parser.h"
 #include "Compiler.h"
 #include "Symbols.h"
+#include "ASTPrint.h"
 
 LoadedProgram::LoadedProgram(DataSource<int> &src)
 {
@@ -32,12 +33,20 @@ void LoadedProgram::load(DataSource<int> &src)
     AST::TopLevel *ast;
     while ((ast = parser.getNext()) != NULL)
     {
+#if DEBUG_OUTPUT
+      AST::printTree(&cerr, ast);
+      cerr.printf("\n");
+#endif
       if (ast->type() == AST::Base::Fun)
         compiler.compile(ast->as<AST::Fun>());
       else if (ast->type() == AST::Base::GlobalVar)
         addGlobal(ast->as<AST::GlobalVar>()->var()->name().id());
       deleteChain(ast);
     }
+#ifdef DEBUG_OUTPUT
+    cerr.printf("\n");
+    AST::printCode(&cerr, *this, &m_strings);
+#endif
   }
   catch (const Lexer::Exception &e)
   {

@@ -5,6 +5,8 @@ SOURCE_DIRS = src $(addprefix src/,$(MODULES))
 SOURCES = $(notdir $(wildcard $(addsuffix /*.cpp,$(SOURCE_DIRS))))
 INCLUDEPATH = $(SOURCE_DIRS)
 
+# DEFINES = DEBUG_OUTPUT
+
 vpath %.cpp $(SOURCE_DIRS)
 vpath %.h $(SOURCE_DIRS)
 
