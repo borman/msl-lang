@@ -20,17 +20,41 @@ class Executor
     class Exception
     {
       public:
-        enum Type { BadType, Trap, UndefVar, UndefFun };
+        Exception(const char *text, size_t addr)
+          : m_text(text), m_addr(addr) {}
 
-        Exception(Type type, size_t addr)
-          : m_type(type), m_addr(addr) {}
-
-        Type type() const { return m_type; }
+        const char *text() const { return m_text; }
         size_t addr() const { return m_addr; }
 
         private:
-          Type m_type;
+          const char *m_text;
           size_t m_addr;
+    };
+    class Undefined: public Exception
+    {
+      public:
+        enum Type { Function, Variable };
+
+        Undefined(Type t, const Atom &name, size_t addr)
+          : Exception("Undefined", addr), 
+            m_type(t), m_name(name) {}
+        Type type() const { return m_type; }
+        Atom name() const { return m_name; }
+      private:
+        Type m_type;
+        Atom m_name;
+    };
+    class BadType: public Exception
+    {
+      public:
+        BadType(Value::Type expected, Value::Type found, size_t addr)
+          : Exception("Types incompatible", addr),
+            m_expected(expected), m_found(found) {}
+        Value::Type expected() const { return m_expected; }
+        Value::Type found() const { return m_found; }
+      private:
+        Value::Type m_expected;
+        Value::Type m_found;
     };
 
     Executor(Program &program, StringTable *strings);

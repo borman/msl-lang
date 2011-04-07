@@ -17,20 +17,20 @@ void Executor::exec(const Instruction &instr)
     m_context.push(execPush(instr));
   else if (instr.isBinOp())
   {
-    Value right = m_context.pop();
-    Value left = m_context.pop();
+    Value right = m_context.popValue();
+    Value left = m_context.popValue();
     m_context.push(execBinOp(instr, left, right));
   }
   else switch (instr.opcode)
   {
       // Pop from stack
     case Instruction::PopVar:
-      m_context.setVar(instr.arg.atom, m_context.pop());
+      m_context.setVar(instr.arg.atom, m_context.popValue());
       break;
     case Instruction::PopArrayItem:
     {
       Value index = m_context.pop(Value::Int);
-      Value val = m_context.pop();
+      Value val = m_context.popValue();
       m_context.arrays.set(m_context.getVar(instr.arg.atom), index, val);
     } break;
     case Instruction::PopDelete:
@@ -115,7 +115,7 @@ Value Executor::execBinOp(const Instruction &instr,
 
 void Executor::trap()
 {
-  throw Exception(Exception::Trap, m_pc);
+  throw Exception("Trap", m_pc);
 }
 
 void Executor::jump(size_t addr)
@@ -142,7 +142,7 @@ void Executor::call(StringTable::Ref name, bool saveRet)
       jump(m_prog.entry(i).addr);
       return;
     }
-  throw Exception(Exception::UndefFun, m_pc);
+  throw Undefined(Undefined::Function, Atom(name, m_context.strings), m_pc);
 }
 
 void Executor::ret()
@@ -181,11 +181,11 @@ void Executor::run(StringTable::Ref entryFun)
   }
   catch (Value::TypeMismatch)
   {
-    throw Exception(Exception::BadType, m_pc);
+    throw BadType(Value::Int, Value::Int, m_pc); // FIXME
   }
   catch (Scope::VarNotFound)
   {
-    throw Exception(Exception::UndefVar, m_pc);
+    throw Undefined(Undefined::Variable, Atom("<unk>", m_context.strings), m_pc);
   }
 }
 

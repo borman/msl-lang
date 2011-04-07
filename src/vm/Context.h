@@ -21,6 +21,7 @@ struct Context
   // Stack operations
   void push(const Value &v);
   Value pop();
+  Value popValue(); // throw BadType on TupOpen, TupClose
   Value pop(Value::Type t);
   void popdelete();
 

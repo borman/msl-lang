@@ -12,6 +12,15 @@ Value Context::pop()
   return v;
 }
 
+Value Context::popValue()
+{
+  Value v = stack.top();
+  if (v.type() == Value::TupClose || v.type() == Value::TupOpen)
+    throw BadType();
+  stack.pop();
+  return v;
+}
+
 void Context::popdelete()
 {
   unsigned int level = 0;
