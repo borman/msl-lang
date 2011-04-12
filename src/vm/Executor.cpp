@@ -179,6 +179,10 @@ void Executor::run(StringTable::Ref entryFun)
     // Remove function result from stack
     m_context.popdelete();
   }
+  catch (Context::BadType)
+  {
+    throw BadType(Value::Int, Value::Int, m_pc); // FIXME
+  }
   catch (Value::TypeMismatch)
   {
     throw BadType(Value::Int, Value::Int, m_pc); // FIXME
