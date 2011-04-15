@@ -36,15 +36,7 @@ int main(int argc, char **argv)
   }
   catch (const Executor::Exception &e)
   {
-    const char *descr = NULL;
-    switch (e.type())
-    {
-      case Executor::Exception::BadType: descr = "Types incompatible"; break;
-      case Executor::Exception::UndefVar: descr = "Undefined variable"; break;
-      case Executor::Exception::UndefFun: descr = "Undefined function"; break;
-      case Executor::Exception::Trap: descr = "Trap"; break;
-    }
-    cout.printf("Executor error: %s at %04zu\n", descr, e.addr());
+    cout.printf("Executor error: %s at %04zu\n", e.text(), e.addr());
     return 1;
   }
 

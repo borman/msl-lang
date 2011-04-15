@@ -57,8 +57,8 @@ namespace AST
         m_own = true;
       }
     private:
-      SafePtr(const SafePtr &sp) {}
-      void operator =(const SafePtr &sp) {}
+      SafePtr(const SafePtr &) {}
+      void operator =(const SafePtr &) {}
 
       T *m_pointer;
       bool m_own;

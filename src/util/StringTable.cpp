@@ -9,7 +9,7 @@ StringTable::~StringTable()
 
 StringTable::Ref StringTable::id(const char *str)
 {
-  unsigned int ret;
+  unsigned int ret = 0;
   if (find(str, ret))
     return ret;
   else

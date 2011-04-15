@@ -17,12 +17,12 @@ TARGET := msl-lang
 BUILD_MODE ?= DEBUG
 
 ifeq ($(BUILD_MODE), RELEASE) 
-CXX = g++
-CXXFLAGS = -pipe -Wall -Wextra -O2 -g 
+	CXX = clang++
+	CXXFLAGS = -pipe -Wall -Wextra -O4 -g 
 else
-CXX = g++
-CXXFLAGS = -pipe -Wall -Wextra -g2
-endif
+	CXX = clang++
+	CXXFLAGS = -pipe -Wall -Wextra -g
+endif 
 
 LDFLAGS = -lm -Wl,--as-needed
 
